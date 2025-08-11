@@ -1,2 +1,3 @@
 [2026-03-12] #0001  Cleaned up unused imports  // initial zonestrike.py
 [2026-03-12] #0002  Refactored module structure  // Add requirements.txt (dnspython)
+[2026-03-12] #0003  Optimised query performance  // versão 1.1.9
