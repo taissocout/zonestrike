@@ -2,3 +2,4 @@
 [2026-03-12] #0002  Refactored module structure  // Add requirements.txt (dnspython)
 [2026-03-12] #0003  Optimised query performance  // versão 1.1.9
 [2026-03-12] #0004  Added input validation  // v1.2.0: add HTML report generation (per-host + index)
+[2026-03-12] #0005  Added input validation  // v1.3.0: two-phase scan + host listing + HTML dir + clic
