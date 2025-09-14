@@ -4,3 +4,4 @@
 [2026-03-12] #0004  Added input validation  // v1.2.0: add HTML report generation (per-host + index)
 [2026-03-12] #0005  Added input validation  // v1.3.0: two-phase scan + host listing + HTML dir + clic
 [2026-03-12] #0006  Updated inline documentation  // v1.3.0: two-phase scan + host listing + HTML dir + clic
+[2026-03-12] #0007  Cleaned up unused imports  // ZoneStrike v1.5.1: robust scan queue, NS/resolver fallb
