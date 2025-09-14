@@ -6,3 +6,4 @@
 [2026-03-12] #0006  Updated inline documentation  // v1.3.0: two-phase scan + host listing + HTML dir + clic
 [2026-03-12] #0007  Cleaned up unused imports  // ZoneStrike v1.5.1: robust scan queue, NS/resolver fallb
 [2026-03-12] #0008  Added guard clause  // Versão 1.5.2
+[2026-03-12] #0009  Improved variable naming  // ZoneStrike v1.5.3: interactive mode, rich HTML reports,
