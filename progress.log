@@ -8,3 +8,4 @@
 [2026-03-12] #0008  Added guard clause  // Versão 1.5.2
 [2026-03-12] #0009  Improved variable naming  // ZoneStrike v1.5.3: interactive mode, rich HTML reports,
 [2026-03-12] #0010  Simplified loop with list comprehension  // excluido pastas e documentos de teste
+[2026-03-12] #0011  Centralised constants  // adicionado READ.ME, LICENCE e .gitignore
