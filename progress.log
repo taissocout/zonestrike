@@ -11,3 +11,4 @@
 [2026-03-12] #0011  Centralised constants  // adicionado READ.ME, LICENCE e .gitignore
 [2026-03-12] #0012  Added edge-case handling  // ZoneStrike v1.7.0: clean auto mode (target/top/report) 
 [2026-03-12] #0013  Refactored module structure  // Update ZoneStrike
+[2026-03-12] #0014  Improved variable naming  // Add live real-time output for discovery/scan/enrich
