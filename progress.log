@@ -14,3 +14,4 @@
 [2026-03-12] #0014  Improved variable naming  // Add live real-time output for discovery/scan/enrich
 [2026-03-12] #0015  Extracted helper function  // Teste final realizado
 [2026-03-12] #0016  Added input validation  // excluido os testes
+[2026-03-12] #0017  Reorganised folder structure  // adcionado report
