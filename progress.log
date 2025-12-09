@@ -22,3 +22,4 @@
 [2026-03-12] #0022  Added guard clause  // ZoneStrike v1.7.1: Deletado todos os reports teste
 [2026-03-12] #0023  Centralised constants  // refactor: reorganiza modulos do zonestrike
 [2026-03-12] #0024  Added input validation  // docs: melhora README com exemplos de uso real
+[2026-03-12] #0025  Improved error messages  // style: padroniza mensagens de log
