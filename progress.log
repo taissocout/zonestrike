@@ -23,3 +23,4 @@
 [2026-03-12] #0023  Centralised constants  // refactor: reorganiza modulos do zonestrike
 [2026-03-12] #0024  Added input validation  // docs: melhora README com exemplos de uso real
 [2026-03-12] #0025  Improved error messages  // style: padroniza mensagens de log
+[2026-03-12] #0026  Simplified loop with list comprehension  // fix: corrige ordenacao de resultados no relatorio HTML
