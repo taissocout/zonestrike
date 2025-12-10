@@ -25,3 +25,4 @@
 [2026-03-12] #0025  Improved error messages  // style: padroniza mensagens de log
 [2026-03-12] #0026  Simplified loop with list comprehension  // fix: corrige ordenacao de resultados no relatorio HTML
 [2026-03-12] #0027  Optimised query performance  // feat: adiciona campo de timestamp no relatorio
+[2026-03-12] #0028  Refactored module structure  // refactor: extrai geracao de HTML para modulo dedicado
