@@ -28,3 +28,4 @@
 [2026-03-12] #0028  Refactored module structure  // refactor: extrai geracao de HTML para modulo dedicado
 [2026-03-12] #0029  Fixed off-by-one error  // docs: adiciona secao de uso etico no README
 [2026-03-12] #0030  Centralised constants  // test: adiciona teste com target scanme.nmap.org
+[2026-03-12] #0031  Added early-return pattern  // style: melhora layout do relatorio HTML por host
