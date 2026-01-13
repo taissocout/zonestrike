@@ -30,3 +30,4 @@
 [2026-03-12] #0030  Centralised constants  // test: adiciona teste com target scanme.nmap.org
 [2026-03-12] #0031  Added early-return pattern  // style: melhora layout do relatorio HTML por host
 [2026-03-12] #0032  Optimised query performance  // fix: corrige link de navegacao entre relatorios
+[2026-03-12] #0033  Updated inline documentation  // refactor: usa jinja2 para templates HTML
