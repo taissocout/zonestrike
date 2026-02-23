@@ -1,0 +1,612 @@
+{
+  "target_domain": "businesscorp.com.br",
+  "nameservers_used": [
+    "37.59.174.226",
+    "37.59.174.225"
+  ],
+  "nameserver_success": "37.59.174.226",
+  "axfr_success": true,
+  "discovered_names": [
+    "businesscorp.com.br",
+    "admin.businesscorp.com.br",
+    "desafio.businesscorp.com.br",
+    "dev.businesscorp.com.br",
+    "documentacao.businesscorp.com.br",
+    "ftp.businesscorp.com.br",
+    "infrasecreta.businesscorp.com.br",
+    "intranet.businesscorp.com.br",
+    "mail.businesscorp.com.br",
+    "ns1.businesscorp.com.br",
+    "ns2.businesscorp.com.br",
+    "parsingok.businesscorp.com.br",
+    "piloto.businesscorp.com.br",
+    "rh.businesscorp.com.br",
+    "srvkey.businesscorp.com.br",
+    "trello.businesscorp.com.br",
+    "wordpress.businesscorp.com.br",
+    "www.businesscorp.com.br"
+  ],
+  "discovered_ips": [
+    "37.59.174.225",
+    "37.59.174.226",
+    "3.5.234.135",
+    "3.5.232.249",
+    "3.5.232.49",
+    "3.5.233.106",
+    "3.5.233.54",
+    "3.5.233.34",
+    "16.12.2.38",
+    "3.5.233.67",
+    "185.199.108.153",
+    "185.199.109.153",
+    "185.199.110.153",
+    "185.199.111.153",
+    "37.59.174.228",
+    "37.59.174.227",
+    "37.59.174.230",
+    "37.59.174.229",
+    "37.59.174.235",
+    "192.0.78.31",
+    "192.0.78.30"
+  ],
+  "ports_profile": "top500",
+  "ports_count": 500,
+  "hosts": [
+    {
+      "host": "16.12.2.38",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "185.199.108.153",
+      "resolved_name": "documentacao.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "185.199.109.153",
+      "resolved_name": "documentacao.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "185.199.110.153",
+      "resolved_name": "documentacao.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "185.199.111.153",
+      "resolved_name": "documentacao.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "192.0.78.30",
+      "resolved_name": "wordpress.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "192.0.78.31",
+      "resolved_name": "wordpress.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "3.5.232.249",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 443,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "https",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 444,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "snpp",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 445,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "microsoft-ds",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 8080,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "3.5.232.49",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 443,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "https",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 444,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "snpp",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 445,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "microsoft-ds",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 8080,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "3.5.233.106",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 443,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "https",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 445,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "microsoft-ds",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 8080,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "3.5.233.34",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "3.5.233.54",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "3.5.233.67",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "3.5.234.135",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 443,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "https",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 444,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "snpp",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 445,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "microsoft-ds",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 8080,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.225",
+      "resolved_name": "businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 21,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "ftp",
+          "product": "ProFTPD",
+          "version": "1.3.4a",
+          "os_hint": null,
+          "confidence": "high",
+          "evidence": "banner",
+          "banner": "220 ProFTPD 1.3.4a Server (FTP) [::ffff:37.59.174.225]\\r\\n",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 22,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "ssh",
+          "product": "OpenSSH",
+          "version": "6.0p1",
+          "os_hint": "Debian-4+deb7u2\\r\\n",
+          "confidence": "high",
+          "evidence": "banner",
+          "banner": "SSH-2.0-OpenSSH_6.0p1 Debian-4+deb7u2\\r\\n",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 53,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "domain",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "Apache/2.2.22 (Debian)",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 200,
+          "http_server": "Apache/2.2.22 (Debian)",
+          "http_title": "Business Corp"
+        },
+        {
+          "port": 111,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "rpcbind",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.226",
+      "resolved_name": "desafio.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 22,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "ssh",
+          "product": "OpenSSH",
+          "version": "6.0p1",
+          "os_hint": "Debian-4+deb7u2\\r\\n",
+          "confidence": "high",
+          "evidence": "banner",
+          "banner": "SSH-2.0-OpenSSH_6.0p1 Debian-4+deb7u2\\r\\n",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 53,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "domain",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 111,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "rpcbind",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.227",
+      "resolved_name": "mail.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.228",
+      "resolved_name": "intranet.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "Apache/2.2.22 (Debian)",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 200,
+          "http_server": "Apache/2.2.22 (Debian)",
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.229",
+      "resolved_name": "rh.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.230",
+      "resolved_name": "piloto.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.235",
+      "resolved_name": "srvkey.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    }
+  ],
+  "started_at": "2026-02-23T23:01:07.077588+00:00",
+  "finished_at": "2026-02-23T23:01:20.708619+00:00",
+  "version": "1.5.3"
+}
