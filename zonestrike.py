@@ -16,6 +16,7 @@ import argparse
 import asyncio
 import csv
 import json
+import os
 import random
 import re
 import ssl
@@ -23,11 +24,14 @@ from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
+from urllib.parse import quote
 
 import dns.query
 import dns.resolver
 import dns.zone
 
+
+VERSION = "1.3.0"
 
 BANNER = r"""
 ███████╗ ██████╗ ███╗   ██╗███████╗███████╗████████╗██████╗ ██╗██╗  ██╗███████╗
@@ -76,7 +80,7 @@ class ScanReport:
     hosts: List[HostReport]
     started_at: str
     finished_at: str
-    version: str = "1.2.0"
+    version: str = VERSION
 
 
 # -------------------- Constants --------------------
@@ -108,6 +112,7 @@ COMMON_SERVICES = {
     6379: "redis",
     8080: "http-alt",
     8443: "https-alt",
+    10000: "webmin/other",
 }
 
 DEFAULT_NMAP_SERVICES_PATHS = [
@@ -120,7 +125,7 @@ DEFAULT_NMAP_SERVICES_PATHS = [
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
-def safe_decode(b: bytes, limit: int = 400) -> str:
+def safe_decode(b: bytes, limit: int = 500) -> str:
     s = b.decode("utf-8", errors="replace")
     s = s.replace("\r", "\\r").replace("\n", "\\n")
     return s[:limit]
@@ -164,7 +169,6 @@ def find_nmap_services_file(custom_path: Optional[str] = None) -> str:
         if p.exists():
             return str(p)
         raise FileNotFoundError(f"nmap-services not found at {custom_path}")
-
     for p in DEFAULT_NMAP_SERVICES_PATHS:
         if Path(p).exists():
             return p
@@ -173,10 +177,8 @@ def find_nmap_services_file(custom_path: Optional[str] = None) -> str:
 def top_ports_from_nmap_services(n: int, proto: str = "tcp", path: Optional[str] = None) -> List[int]:
     services_path = find_nmap_services_file(path)
     text = Path(services_path).read_text(encoding="utf-8", errors="ignore")
-
     rx = re.compile(r"^\s*([^\s]+)\s+(\d+)\/(tcp|udp)\s+([0-9.]+)")
     rows: List[Tuple[float, int]] = []
-
     for line in text.splitlines():
         if not line or line.lstrip().startswith("#"):
             continue
@@ -188,9 +190,7 @@ def top_ports_from_nmap_services(n: int, proto: str = "tcp", path: Optional[str]
         freq = float(m.group(4))
         if pproto == proto and 1 <= port <= 65535:
             rows.append((freq, port))
-
     rows.sort(reverse=True, key=lambda x: x[0])
-
     out: List[int] = []
     seen: Set[int] = set()
     for _, port in rows:
@@ -221,7 +221,6 @@ def select_ports(profile: str, custom: str, ports_file: str, nmap_services_path:
         return ports
     raise ValueError("Invalid port profile")
 
-
 def html_escape(s: str) -> str:
     return (
         s.replace("&", "&amp;")
@@ -232,7 +231,6 @@ def html_escape(s: str) -> str:
     )
 
 def safe_filename(s: str) -> str:
-    # keep letters/numbers/.-_ ; replace other chars with underscore
     return re.sub(r"[^a-zA-Z0-9._-]+", "_", s)
 
 
@@ -241,14 +239,11 @@ def discover_authoritative_ns_ips(domain: str, timeout: float = 3.0) -> List[str
     r = dns.resolver.Resolver()
     r.timeout = timeout
     r.lifetime = timeout
-
-    ns_names: List[str] = []
     try:
         ans = r.resolve(domain, "NS")
         ns_names = [rr.to_text().rstrip(".") for rr in ans]
     except Exception:
         return []
-
     ips: List[str] = []
     for ns in ns_names:
         try:
@@ -261,7 +256,6 @@ def discover_authoritative_ns_ips(domain: str, timeout: float = 3.0) -> List[str
             ips.extend([rr.to_text() for rr in aaaa])
         except Exception:
             pass
-
     return uniq_keep_order([ip for ip in ips if ip])
 
 
@@ -284,7 +278,6 @@ def resolve_names_to_ips(names: List[str], resolver_nameserver_ip: str, timeout:
     r.nameservers = [resolver_nameserver_ip]
     r.timeout = timeout
     r.lifetime = timeout
-
     out: Dict[str, List[str]] = {}
     for n in names:
         try:
@@ -295,56 +288,69 @@ def resolve_names_to_ips(names: List[str], resolver_nameserver_ip: str, timeout:
     return out
 
 
-# -------------------- TCP Scan --------------------
-async def try_connect(host: str, port: int, timeout: float) -> Tuple[str, Optional[str]]:
+# -------------------- TCP Scan (Phase 1) --------------------
+async def try_connect(host: str, port: int, timeout: float) -> bool:
+    """
+    Phase 1: only checks if port is open (fast). Returns True if open.
+    """
     try:
-        conn = asyncio.open_connection(host, port)
-        reader, writer = await asyncio.wait_for(conn, timeout=timeout)
-
-        banner = None
-        try:
-            data = await asyncio.wait_for(reader.read(160), timeout=0.8)
-            if data:
-                banner = safe_decode(data)
-        except Exception:
-            banner = None
-
+        reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=timeout)
         writer.close()
         try:
             await writer.wait_closed()
         except Exception:
             pass
-
-        return "open", banner
+        return True
     except Exception:
-        return "closed", None
+        return False
 
-async def scan_host_ports(host: str, ports: List[int], concurrency: int, timeout: float) -> List[PortFinding]:
+async def scan_open_ports(host: str, ports: List[int], concurrency: int, timeout: float) -> List[int]:
+    """
+    Returns list of open ports.
+    """
     sem = asyncio.Semaphore(concurrency)
-    findings: List[PortFinding] = []
+    open_ports: List[int] = []
 
-    async def one(port: int) -> None:
+    async def one(p: int) -> None:
         async with sem:
-            state, banner = await try_connect(host, port, timeout)
-            if state == "open":
-                findings.append(
-                    PortFinding(
-                        port=port,
-                        proto="tcp",
-                        state="open",
-                        service_guess=COMMON_SERVICES.get(port),
-                        banner=banner,
-                    )
-                )
+            if await try_connect(host, p, timeout):
+                open_ports.append(p)
 
-    tasks = [asyncio.create_task(one(p)) for p in ports]
-    await asyncio.gather(*tasks)
-    findings.sort(key=lambda f: f.port)
-    return findings
+    await asyncio.gather(*[asyncio.create_task(one(p)) for p in ports])
+    open_ports.sort()
+    return open_ports
 
 
-# -------------------- Optional HTTP Probe (UA FIXO) --------------------
+# -------------------- Enrichment (Phase 2) --------------------
+async def grab_banner(host: str, port: int, timeout: float) -> Optional[str]:
+    """
+    Best-effort banner read after connecting.
+    """
+    try:
+        reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=timeout)
+        banner = None
+        try:
+            data = await asyncio.wait_for(reader.read(200), timeout=0.9)
+            if data:
+                banner = safe_decode(data)
+        except Exception:
+            banner = None
+        writer.close()
+        try:
+            await writer.wait_closed()
+        except Exception:
+            pass
+        return banner
+    except Exception:
+        return None
+
 async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeout: float) -> Tuple[Optional[int], Optional[str], Optional[str]]:
+    """
+    Very small HTTP/HTTPS probe:
+    - HEAD /
+    - parse status + Server header
+    - best-effort GET / to extract <title> (capped)
+    """
     try:
         ssl_ctx = None
         if use_tls:
@@ -352,10 +358,7 @@ async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeo
             ssl_ctx.check_hostname = False
             ssl_ctx.verify_mode = ssl.CERT_NONE
 
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port, ssl=ssl_ctx),
-            timeout=timeout,
-        )
+        reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port, ssl=ssl_ctx), timeout=timeout)
 
         req = (
             "HEAD / HTTP/1.1\r\n"
@@ -384,10 +387,7 @@ async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeo
 
         title = None
         try:
-            reader2, writer2 = await asyncio.wait_for(
-                asyncio.open_connection(host, port, ssl=ssl_ctx),
-                timeout=timeout,
-            )
+            reader2, writer2 = await asyncio.wait_for(asyncio.open_connection(host, port, ssl=ssl_ctx), timeout=timeout)
             req2 = (
                 "GET / HTTP/1.1\r\n"
                 f"Host: {host}\r\n"
@@ -425,6 +425,64 @@ async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeo
         return None, None, None
 
 
+async def enrich_open_ports(
+    host: str,
+    open_ports: List[int],
+    timeout: float,
+    do_http_probe: bool,
+    http_timeout: float,
+    user_agent: str,
+    mode: str,
+    concurrency: int,
+) -> List[PortFinding]:
+    """
+    Phase 2: enrich ONLY open ports.
+    mode:
+      - "serial": one-by-one (requested)
+      - "parallel": concurrent enrichment for speed
+    """
+    findings: List[PortFinding] = []
+
+    async def enrich_one(p: int) -> None:
+        pf = PortFinding(
+            port=p,
+            proto="tcp",
+            state="open",
+            service_guess=COMMON_SERVICES.get(p),
+            banner=None,
+        )
+        pf.banner = await grab_banner(host, p, timeout)
+
+        if do_http_probe:
+            # probe only likely web ports
+            tls = p in (443, 8443, 9443)
+            plain = p in (80, 8080, 8000, 8888, 3000, 10000)
+            if tls or plain:
+                st, sv, title = await http_probe(host, p, tls, user_agent, http_timeout)
+                pf.http_status = st
+                pf.http_server = sv
+                pf.http_title = title
+
+        findings.append(pf)
+
+    if mode == "serial":
+        for p in open_ports:
+            await enrich_one(p)
+        findings.sort(key=lambda x: x.port)
+        return findings
+
+    # parallel
+    sem = asyncio.Semaphore(concurrency)
+
+    async def wrapped(p: int) -> None:
+        async with sem:
+            await enrich_one(p)
+
+    await asyncio.gather(*[asyncio.create_task(wrapped(p)) for p in open_ports])
+    findings.sort(key=lambda x: x.port)
+    return findings
+
+
 # -------------------- Reporting (JSON/CSV) --------------------
 def write_json(path: str, report: ScanReport) -> None:
     with open(path, "w", encoding="utf-8") as f:
@@ -460,11 +518,9 @@ def build_host_html(report: ScanReport, host: HostReport) -> str:
     host_id = host.resolved_name or host.host
     title = f"ZoneStrike Report — {report.target_domain} — {host_id}"
 
-    # Ports table rows (banner shown as last column)
     rows = []
     for pf in host.open_ports:
         banner = pf.banner or ""
-        # keep banners at the end (as requested)
         rows.append(
             "<tr>"
             f"<td>{pf.port}</td>"
@@ -485,7 +541,7 @@ def build_host_html(report: ScanReport, host: HostReport) -> str:
 
     summary_ports = ", ".join(str(p.port) for p in host.open_ports) if host.open_ports else "None"
 
-    html = f"""<!doctype html>
+    return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -543,24 +599,23 @@ def build_host_html(report: ScanReport, host: HostReport) -> str:
   </div>
 </body>
 </html>"""
-    return html
 
 def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]]) -> str:
     title = f"ZoneStrike Report Index — {report.target_domain}"
     rows = []
-    for filename, hr in host_files:
+    for rel_file, hr in host_files:
         host_label = hr.resolved_name or hr.host
         open_ports = ", ".join(str(p.port) for p in hr.open_ports) if hr.open_ports else "None"
         rows.append(
             "<tr>"
-            f"<td><a href='{html_escape(filename)}'>{html_escape(host_label)}</a></td>"
+            f"<td><a href='{html_escape(rel_file)}'>{html_escape(host_label)}</a></td>"
             f"<td>{html_escape(hr.host)}</td>"
             f"<td>{html_escape(open_ports)}</td>"
             f"<td>{len(hr.open_ports)}</td>"
             "</tr>"
         )
 
-    html = f"""<!doctype html>
+    return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -609,32 +664,27 @@ def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]
   </div>
 </body>
 </html>"""
-    return html
 
-def write_html_reports(out_base: str, report: ScanReport) -> List[str]:
-    """
-    Writes:
-      - {out_base}_index.html
-      - {out_base}_{host}.html  (host = resolved_name if available else ip)
-    Returns list of written filenames.
-    """
+def write_html_reports(out_base: str, html_dir: str, report: ScanReport) -> Tuple[List[str], str]:
+    Path(html_dir).mkdir(parents=True, exist_ok=True)
+
     written: List[str] = []
-
     host_files: List[Tuple[str, HostReport]] = []
+
     for hr in report.hosts:
         host_id = hr.resolved_name or hr.host
         fname = f"{out_base}_{safe_filename(host_id)}.html"
-        html = build_host_html(report, hr)
-        Path(fname).write_text(html, encoding="utf-8")
-        written.append(fname)
-        host_files.append((fname, hr))
+        out_path = Path(html_dir) / fname
+        out_path.write_text(build_host_html(report, hr), encoding="utf-8")
+        written.append(str(out_path))
+        host_files.append((fname, hr))  # relative links in index
 
     index_name = f"{out_base}_index.html"
-    index_html = build_index_html(report, host_files)
-    Path(index_name).write_text(index_html, encoding="utf-8")
-    written.append(index_name)
+    index_path = Path(html_dir) / index_name
+    index_path.write_text(build_index_html(report, host_files), encoding="utf-8")
+    written.append(str(index_path))
 
-    return written
+    return written, str(index_path)
 
 
 # -------------------- Main --------------------
@@ -650,23 +700,33 @@ async def main() -> None:
     ap.add_argument("--ports-file", default="", help="Used with file. One port per line or CSV.")
     ap.add_argument("--nmap-services-path", default="", help="Path to nmap-services (optional).")
 
-    ap.add_argument("--host-concurrency", type=int, default=30, help="Hosts in parallel")
-    ap.add_argument("--port-concurrency", type=int, default=300, help="Ports per host in parallel")
-    ap.add_argument("--timeout", type=float, default=1.2, help="TCP connect timeout seconds")
+    ap.add_argument("--host-concurrency", type=int, default=25, help="Hosts in parallel (phase 1)")
+    ap.add_argument("--port-concurrency", type=int, default=300, help="Ports per host in parallel (phase 1)")
+    ap.add_argument("--timeout", type=float, default=1.2, help="TCP connect timeout seconds (phase 1)")
 
-    ap.add_argument("--delay", type=float, default=0.0, help="Delay (sec) before scanning each host (reduces load).")
-    ap.add_argument("--jitter", type=float, default=0.0, help="Random jitter (sec) added to delay (reduces spikes).")
+    ap.add_argument("--delay", type=float, default=0.0, help="Delay (sec) before scanning each host.")
+    ap.add_argument("--jitter", type=float, default=0.0, help="Random jitter (sec) added to delay.")
 
     ap.add_argument("--axfr-timeout", type=float, default=6.0, help="AXFR timeout seconds")
     ap.add_argument("--dns-timeout", type=float, default=3.0, help="DNS resolve timeout seconds")
 
-    ap.add_argument("--http-probe", action="store_true", help="Simple HTTP probe on open web ports (80/443/8080/8443...).")
-    ap.add_argument("--user-agent", default="ZoneStrike/1.2.0 (authorized testing)",
-                    help="Fixed User-Agent used ONLY for HTTP probe (not used in TCP port scan).")
-    ap.add_argument("--http-timeout", type=float, default=2.0, help="HTTP probe timeout seconds")
+    # Enrichment controls (phase 2)
+    ap.add_argument("--enrich", action="store_true", help="Enrich open ports (banners + optional HTTP probe).")
+    ap.add_argument("--enrich-mode", choices=["serial", "parallel"], default="serial",
+                    help="Enrichment mode: serial (one-by-one) or parallel.")
+    ap.add_argument("--enrich-concurrency", type=int, default=20, help="Concurrency for enrichment when mode=parallel.")
+    ap.add_argument("--banner-timeout", type=float, default=1.8, help="Timeout for banner grab on open ports.")
+
+    ap.add_argument("--http-probe", action="store_true", help="HTTP probe on common web ports (only during enrichment).")
+    ap.add_argument("--user-agent", default=f"ZoneStrike/{VERSION} (authorized testing)",
+                    help="Fixed User-Agent used only for HTTP probe.")
+    ap.add_argument("--http-timeout", type=float, default=2.2, help="HTTP probe timeout seconds")
 
     ap.add_argument("--out", default="zonestrike_report", help="Output base name (writes .json/.csv and optional HTML)")
     ap.add_argument("--html", action="store_true", help="Generate HTML reports (per-host + index).")
+    ap.add_argument("--html-dir", default="reports", help="Directory to write HTML reports (default: reports).")
+
+    ap.add_argument("--list-hosts", action="store_true", help="Print all discovered hostnames and IPs.")
     ap.add_argument("--no-banner", action="store_true", help="Do not print banner")
 
     args = ap.parse_args()
@@ -677,13 +737,8 @@ async def main() -> None:
     started = now_iso()
 
     # Determine NS IPs to try
-    ns_ips: List[str] = []
-    if args.ns.strip():
-        ns_ips = [args.ns.strip()]
-    else:
-        ns_ips = discover_authoritative_ns_ips(args.domain, timeout=args.dns_timeout)
-
-    ns_ips = uniq_keep_order(ns_ips)
+    ns_ips: List[str] = [args.ns.strip()] if args.ns.strip() else discover_authoritative_ns_ips(args.domain, timeout=args.dns_timeout)
+    ns_ips = uniq_keep_order([ip for ip in ns_ips if ip])
 
     if not ns_ips:
         finished = now_iso()
@@ -708,7 +763,7 @@ async def main() -> None:
         print(f"[+] Report written: {json_path} and {csv_path}")
         return
 
-    # AXFR try each NS
+    # AXFR: try each NS IP until success
     axfr_ok = False
     names: List[str] = []
     ns_success: Optional[str] = None
@@ -723,7 +778,7 @@ async def main() -> None:
             break
         axfr_errors.append(f"{ns_ip}: {err}")
 
-    if not axfr_ok:
+    if not axfr_ok or not ns_success:
         finished = now_iso()
         report = ScanReport(
             target_domain=args.domain,
@@ -757,59 +812,78 @@ async def main() -> None:
     ips = uniq_keep_order([ip for ip in ips if ip])
 
     ip_to_name: Dict[str, str] = {}
-    for n, iplist in name_to_ips.items():
+    for fqdn, iplist in name_to_ips.items():
         for ip in iplist:
             if ip and ip not in ip_to_name:
-                ip_to_name[ip] = n
+                ip_to_name[ip] = fqdn
+
+    # Print discovered hosts (requested)
+    if args.list_hosts:
+        print("\n[+] Discovered hosts (FQDN -> IPs):")
+        for fqdn in sorted(name_to_ips.keys()):
+            iplist = name_to_ips.get(fqdn, [])
+            if iplist:
+                print(f"    - {fqdn} -> {', '.join(iplist)}")
+            else:
+                print(f"    - {fqdn} -> (no A record)")
+        print(f"[+] Unique IPs: {len(ips)}\n")
 
     # Ports selection
     nmap_path = args.nmap_services_path.strip() or None
     ports = select_ports(args.port_profile, args.ports, args.ports_file, nmap_path)
 
-    # Scan
+    # Scan (Phase 1) + optional Enrichment (Phase 2)
     hosts_reports: List[HostReport] = []
     host_sem = asyncio.Semaphore(args.host_concurrency)
 
     async def scan_one_host(ip: str) -> None:
         async with host_sem:
             errors: List[str] = []
+
             if args.delay > 0 or args.jitter > 0:
                 await asyncio.sleep(max(0.0, args.delay) + (random.random() * max(0.0, args.jitter)))
 
             try:
-                open_ports = await scan_host_ports(
+                # Phase 1: open ports only
+                open_ports = await scan_open_ports(
                     ip,
                     ports=ports,
                     concurrency=args.port_concurrency,
                     timeout=float(args.timeout),
                 )
 
-                if args.http_probe and open_ports:
-                    web_candidates: List[Tuple[PortFinding, bool]] = []
-                    for pf in open_ports:
-                        if pf.port in (80, 8080, 8000, 8888, 3000):
-                            web_candidates.append((pf, False))
-                        elif pf.port in (443, 8443, 9443):
-                            web_candidates.append((pf, True))
-
-                    probe_sem = asyncio.Semaphore(10)
-
-                    async def probe_one(pf: PortFinding, tls: bool) -> None:
-                        async with probe_sem:
-                            st, sv, title = await http_probe(ip, pf.port, tls, args.user_agent, float(args.http_timeout))
-                            pf.http_status = st
-                            pf.http_server = sv
-                            pf.http_title = title
-
-                    await asyncio.gather(*[
-                        asyncio.create_task(probe_one(pf, tls)) for pf, tls in web_candidates
-                    ])
+                findings: List[PortFinding] = []
+                if open_ports:
+                    if args.enrich:
+                        # Phase 2: enrich only open ports (serial by default)
+                        findings = await enrich_open_ports(
+                            host=ip,
+                            open_ports=open_ports,
+                            timeout=float(args.banner_timeout),
+                            do_http_probe=bool(args.http_probe),
+                            http_timeout=float(args.http_timeout),
+                            user_agent=args.user_agent,
+                            mode=args.enrich_mode,
+                            concurrency=args.enrich_concurrency,
+                        )
+                    else:
+                        # Just store open ports without extra network noise
+                        findings = [
+                            PortFinding(
+                                port=p,
+                                proto="tcp",
+                                state="open",
+                                service_guess=COMMON_SERVICES.get(p),
+                                banner=None,
+                            )
+                            for p in open_ports
+                        ]
 
                 hosts_reports.append(
                     HostReport(
                         host=ip,
                         resolved_name=ip_to_name.get(ip),
-                        open_ports=open_ports,
+                        open_ports=findings,
                         errors=errors,
                     )
                 )
@@ -851,15 +925,18 @@ async def main() -> None:
 
     print(f"[+] NS IPs tried: {len(ns_ips)}")
     print(f"[+] AXFR success: True (NS: {ns_success})")
-    print(f"[+] Names discovered: {len(names)} | IPs resolved: {len(ips)}")
+    print(f"[+] Names discovered: {len(names)} | Unique IPs resolved: {len(ips)}")
     print(f"[+] Ports profile: {args.port_profile} | Ports count: {len(ports)}")
     print(f"[+] Hosts scanned: {len(hosts_reports)}")
     print(f"[+] Report written: {json_path} and {csv_path}")
 
+    # HTML
     if args.html:
-        written = write_html_reports(args.out, report)
-        # print only the most useful names
-        print(f"[+] HTML written: {len(written)} files (index: {args.out}_index.html)")
+        written, index_path = write_html_reports(args.out, args.html_dir, report)
+        abs_index = os.path.abspath(index_path)
+        file_url = "file://" + quote(abs_index)
+        print(f"[+] HTML written: {len(written)} files in ./{args.html_dir}")
+        print(f"[+] Open report: {file_url}")
 
 
 if __name__ == "__main__":
