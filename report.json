@@ -1,0 +1,242 @@
+{
+  "target_domain": "businesscorp.com.br",
+  "nameservers_used": [
+    "37.59.174.226",
+    "37.59.174.225"
+  ],
+  "nameserver_success": "37.59.174.226",
+  "axfr_success": true,
+  "discovered_names": [
+    "businesscorp.com.br",
+    "admin.businesscorp.com.br",
+    "desafio.businesscorp.com.br",
+    "dev.businesscorp.com.br",
+    "documentacao.businesscorp.com.br",
+    "ftp.businesscorp.com.br",
+    "infrasecreta.businesscorp.com.br",
+    "intranet.businesscorp.com.br",
+    "mail.businesscorp.com.br",
+    "ns1.businesscorp.com.br",
+    "ns2.businesscorp.com.br",
+    "parsingok.businesscorp.com.br",
+    "piloto.businesscorp.com.br",
+    "rh.businesscorp.com.br",
+    "srvkey.businesscorp.com.br",
+    "trello.businesscorp.com.br",
+    "wordpress.businesscorp.com.br",
+    "www.businesscorp.com.br"
+  ],
+  "discovered_ips": [
+    "37.59.174.225",
+    "37.59.174.226",
+    "37.59.174.228",
+    "37.59.174.227",
+    "37.59.174.230",
+    "37.59.174.229",
+    "37.59.174.235"
+  ],
+  "ports_profile": "top100",
+  "ports_count": 100,
+  "hosts": [
+    {
+      "host": "37.59.174.225",
+      "resolved_name": "businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 21,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "ftp",
+          "banner": "220 ProFTPD 1.3.4a Server (FTP) [::ffff:37.59.174.225]\\r\\n",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 22,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "ssh",
+          "banner": "SSH-2.0-OpenSSH_6.0p1 Debian-4+deb7u2\\r\\n",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 53,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "dns",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "http",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 111,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "rpcbind",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.226",
+      "resolved_name": "desafio.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 22,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "ssh",
+          "banner": "SSH-2.0-OpenSSH_6.0p1 Debian-4+deb7u2\\r\\n",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 53,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "dns",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 111,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "rpcbind",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.227",
+      "resolved_name": "mail.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 21,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "ftp",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "http",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 110,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "pop3",
+          "banner": "+OK Hello there.\\r\\n",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 143,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "imap",
+          "banner": "* OK [CAPABILITY IMAP4rev1 UIDPLUS CHILDREN NAMESPACE THREAD=ORDEREDSUBJECT THREAD=REFERENCES SORT QUOTA IDLE ACL ACL2=UNION] Courier-IMAP ready. Copyright 1998",
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.228",
+      "resolved_name": "intranet.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "http",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 10000,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": null,
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.229",
+      "resolved_name": "rh.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_guess": "http",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.230",
+      "resolved_name": "piloto.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    },
+    {
+      "host": "37.59.174.235",
+      "resolved_name": "srvkey.businesscorp.com.br",
+      "open_ports": [],
+      "errors": []
+    }
+  ],
+  "started_at": "2026-02-23T21:49:26.799396+00:00",
+  "finished_at": "2026-02-23T21:49:32.831674+00:00",
+  "version": "1.1.0"
+}

@@ -66,7 +66,8 @@ class HostReport:
 @dataclass
 class ScanReport:
     target_domain: str
-    nameserver: str
+    nameservers_used: List[str]          # IPs that were tried
+    nameserver_success: Optional[str]    # IP that succeeded AXFR (if any)
     axfr_success: bool
     discovered_names: List[str]
     discovered_ips: List[str]
@@ -75,7 +76,7 @@ class ScanReport:
     hosts: List[HostReport]
     started_at: str
     finished_at: str
-    version: str = "1.0.0"
+    version: str = "1.1.0"
 
 
 # -------------------- Constants --------------------
@@ -134,12 +135,6 @@ def uniq_keep_order(items: List[str]) -> List[str]:
     return out
 
 def parse_ports(s: str) -> List[int]:
-    """
-    Accepts:
-      - "1-1000"
-      - "22,80,443"
-      - "1-1024,3306,8080"
-    """
     ports: Set[int] = set()
     parts = [p.strip() for p in s.split(",") if p.strip()]
     for p in parts:
@@ -176,10 +171,6 @@ def find_nmap_services_file(custom_path: Optional[str] = None) -> str:
     raise FileNotFoundError("nmap-services não encontrado. Instale nmap ou informe --nmap-services-path")
 
 def top_ports_from_nmap_services(n: int, proto: str = "tcp", path: Optional[str] = None) -> List[int]:
-    """
-    Extrai top-N portas por frequência do arquivo nmap-services local.
-    Linha típica: service 80/tcp 0.484143 # comment
-    """
     services_path = find_nmap_services_file(path)
     text = Path(services_path).read_text(encoding="utf-8", errors="ignore")
 
@@ -231,30 +222,65 @@ def select_ports(profile: str, custom: str, ports_file: str, nmap_services_path:
     raise ValueError("Perfil de portas inválido")
 
 
-# -------------------- AXFR --------------------
-def do_axfr(domain: str, nameserver: str, timeout: float = 6.0) -> Tuple[bool, List[str]]:
+# -------------------- NS Discovery (AUTO) --------------------
+def discover_authoritative_ns_ips(domain: str, timeout: float = 3.0) -> List[str]:
     """
-    Returns (success, fqdn_names).
+    Discovers NS names for the domain and resolves them to A/AAAA.
+    Returns list of IPs (unique, ordered).
+    """
+    r = dns.resolver.Resolver()
+    r.timeout = timeout
+    r.lifetime = timeout
+
+    ns_names: List[str] = []
+    try:
+        ans = r.resolve(domain, "NS")
+        ns_names = [rr.to_text().rstrip(".") for rr in ans]
+    except Exception:
+        return []
+
+    ips: List[str] = []
+    for ns in ns_names:
+        # A
+        try:
+            a = r.resolve(ns, "A")
+            ips.extend([rr.to_text() for rr in a])
+        except Exception:
+            pass
+        # AAAA
+        try:
+            aaaa = r.resolve(ns, "AAAA")
+            ips.extend([rr.to_text() for rr in aaaa])
+        except Exception:
+            pass
+
+    return uniq_keep_order([ip for ip in ips if ip])
+
+
+# -------------------- AXFR --------------------
+def do_axfr(domain: str, nameserver_ip: str, timeout: float = 6.0) -> Tuple[bool, List[str], str]:
+    """
+    Returns (success, fqdn_names, error_message)
     """
     try:
-        xfr = dns.query.xfr(where=nameserver, zone=domain, timeout=timeout, lifetime=timeout)
+        xfr = dns.query.xfr(where=nameserver_ip, zone=domain, timeout=timeout, lifetime=timeout)
         z = dns.zone.from_xfr(xfr)
         names: List[str] = []
         for name, _node in z.nodes.items():
             fqdn = f"{name}.{domain}".replace("@.", "").strip(".")
             if fqdn:
                 names.append(fqdn)
-        return True, uniq_keep_order(names)
-    except Exception:
-        return False, []
+        return True, uniq_keep_order(names), ""
+    except Exception as e:
+        return False, [], str(e)
 
-def resolve_names_to_ips(names: List[str], resolver_nameserver: str, timeout: float = 3.0) -> Dict[str, List[str]]:
+def resolve_names_to_ips(names: List[str], resolver_nameserver_ip: str, timeout: float = 3.0) -> Dict[str, List[str]]:
     """
-    Resolve A records using a specific nameserver.
+    Resolve A records using a specific nameserver (by IP).
     Returns mapping name -> list of IPs.
     """
     r = dns.resolver.Resolver(configure=False)
-    r.nameservers = [resolver_nameserver]
+    r.nameservers = [resolver_nameserver_ip]
     r.timeout = timeout
     r.lifetime = timeout
 
@@ -270,10 +296,6 @@ def resolve_names_to_ips(names: List[str], resolver_nameserver: str, timeout: fl
 
 # -------------------- TCP Scan --------------------
 async def try_connect(host: str, port: int, timeout: float) -> Tuple[str, Optional[str]]:
-    """
-    TCP connect scan. Returns (state, banner).
-    We only report open ports; closed/filtered are not listed to keep report clean.
-    """
     try:
         conn = asyncio.open_connection(host, port)
         reader, writer = await asyncio.wait_for(conn, timeout=timeout)
@@ -322,12 +344,6 @@ async def scan_host_ports(host: str, ports: List[int], concurrency: int, timeout
 
 # -------------------- Optional HTTP Probe (UA FIXO) --------------------
 async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeout: float) -> Tuple[Optional[int], Optional[str], Optional[str]]:
-    """
-    Very small HTTP/HTTPS probe:
-    - sends HEAD /
-    - reads headers
-    - best-effort GET / to extract <title> (capped)
-    """
     try:
         ssl_ctx = None
         if use_tls:
@@ -443,7 +459,9 @@ async def main() -> None:
     ap = argparse.ArgumentParser(description="ZoneStrike — AXFR + TCP Port Scanner (authorized testing only).")
 
     ap.add_argument("--domain", required=True, help="Domain/zone (e.g. example.com)")
-    ap.add_argument("--ns", required=True, help="Authoritative nameserver IP (e.g. 192.0.2.53)")
+
+    # ns is now optional
+    ap.add_argument("--ns", default="", help="Authoritative nameserver IP. If omitted, ZoneStrike auto-discovers NS IPs.")
 
     ap.add_argument("--port-profile", choices=["top100", "top1000", "all", "custom", "file"], default="top1000",
                     help="Ports profile: top100/top1000/all/custom/file")
@@ -458,9 +476,12 @@ async def main() -> None:
     ap.add_argument("--delay", type=float, default=0.0, help="Delay (sec) before scanning each host (reduces load).")
     ap.add_argument("--jitter", type=float, default=0.0, help="Random jitter (sec) added to delay (reduces spikes).")
 
-    # Optional HTTP probe (UA FIXO)
+    ap.add_argument("--axfr-timeout", type=float, default=6.0, help="AXFR timeout seconds")
+    ap.add_argument("--dns-timeout", type=float, default=3.0, help="DNS resolve timeout seconds")
+
+    # Optional HTTP probe
     ap.add_argument("--http-probe", action="store_true", help="Simple HTTP probe on open web ports (80/443/8080/8443...).")
-    ap.add_argument("--user-agent", default="ZoneStrike/1.0 (authorized testing)",
+    ap.add_argument("--user-agent", default="ZoneStrike/1.1.0 (authorized testing)",
                     help="Fixed User-Agent used ONLY for HTTP probe (not used in TCP port scan).")
     ap.add_argument("--http-timeout", type=float, default=2.0, help="HTTP probe timeout seconds")
 
@@ -474,35 +495,101 @@ async def main() -> None:
 
     started = now_iso()
 
-    # 1) AXFR
-    axfr_ok, names = do_axfr(args.domain, args.ns)
-    name_to_ips = resolve_names_to_ips(names, args.ns) if axfr_ok else {}
+    # Determine NS IPs to try
+    ns_ips: List[str] = []
+    if args.ns.strip():
+        ns_ips = [args.ns.strip()]
+    else:
+        ns_ips = discover_authoritative_ns_ips(args.domain, timeout=args.dns_timeout)
+
+    ns_ips = uniq_keep_order(ns_ips)
+
+    if not ns_ips:
+        # No NS IPs discovered -> report empty
+        finished = now_iso()
+        report = ScanReport(
+            target_domain=args.domain,
+            nameservers_used=[],
+            nameserver_success=None,
+            axfr_success=False,
+            discovered_names=[],
+            discovered_ips=[],
+            ports_profile=args.port_profile,
+            ports_count=0,
+            hosts=[],
+            started_at=started,
+            finished_at=finished,
+        )
+        write_json(f"{args.out}.json", report)
+        write_csv(f"{args.out}.csv", report)
+        print("[!] Could not discover any authoritative NS IPs. Check DNS or pass --ns explicitly.")
+        print(f"[+] Report written: {args.out}.json and {args.out}.csv")
+        return
+
+    # 1) AXFR: try each NS IP until success
+    axfr_ok = False
+    names: List[str] = []
+    ns_success: Optional[str] = None
+    axfr_errors: List[str] = []
+
+    for ns_ip in ns_ips:
+        ok, n, err = do_axfr(args.domain, ns_ip, timeout=float(args.axfr_timeout))
+        if ok:
+            axfr_ok = True
+            names = n
+            ns_success = ns_ip
+            break
+        axfr_errors.append(f"{ns_ip}: {err}")
+
+    if not axfr_ok:
+        finished = now_iso()
+        report = ScanReport(
+            target_domain=args.domain,
+            nameservers_used=ns_ips,
+            nameserver_success=None,
+            axfr_success=False,
+            discovered_names=[],
+            discovered_ips=[],
+            ports_profile=args.port_profile,
+            ports_count=0,
+            hosts=[],
+            started_at=started,
+            finished_at=finished,
+        )
+        write_json(f"{args.out}.json", report)
+        write_csv(f"{args.out}.csv", report)
+        print("[!] AXFR failed on all discovered/provided NS IPs.")
+        # mostra só uma amostra de erros para debug sem poluir
+        for e in axfr_errors[:3]:
+            print(f"    - {e}")
+        print(f"[+] Report written: {args.out}.json and {args.out}.csv")
+        return
+
+    # 2) Resolve A records using the NS that succeeded AXFR
+    name_to_ips = resolve_names_to_ips(names, ns_success, timeout=float(args.dns_timeout))
 
     ips: List[str] = []
     for iplist in name_to_ips.values():
         ips.extend(iplist)
     ips = uniq_keep_order([ip for ip in ips if ip])
 
-    # map ip -> first resolved name
     ip_to_name: Dict[str, str] = {}
     for n, iplist in name_to_ips.items():
         for ip in iplist:
             if ip and ip not in ip_to_name:
                 ip_to_name[ip] = n
 
-    # 2) Ports selection
+    # 3) Ports selection
     nmap_path = args.nmap_services_path.strip() or None
     ports = select_ports(args.port_profile, args.ports, args.ports_file, nmap_path)
 
-    # 3) Scan (parallel by host)
+    # 4) Scan (parallel by host)
     hosts_reports: List[HostReport] = []
     host_sem = asyncio.Semaphore(args.host_concurrency)
 
     async def scan_one_host(ip: str) -> None:
         async with host_sem:
             errors: List[str] = []
-
-            # gentle pacing to reduce load (not stealth/evasion)
             if args.delay > 0 or args.jitter > 0:
                 await asyncio.sleep(max(0.0, args.delay) + (random.random() * max(0.0, args.jitter)))
 
@@ -511,10 +598,9 @@ async def main() -> None:
                     ip,
                     ports=ports,
                     concurrency=args.port_concurrency,
-                    timeout=args.timeout,
+                    timeout=float(args.timeout),
                 )
 
-                # Optional HTTP probe on common web ports
                 if args.http_probe and open_ports:
                     web_candidates: List[Tuple[PortFinding, bool]] = []
                     for pf in open_ports:
@@ -527,7 +613,7 @@ async def main() -> None:
 
                     async def probe_one(pf: PortFinding, tls: bool) -> None:
                         async with probe_sem:
-                            st, sv, title = await http_probe(ip, pf.port, tls, args.user_agent, args.http_timeout)
+                            st, sv, title = await http_probe(ip, pf.port, tls, args.user_agent, float(args.http_timeout))
                             pf.http_status = st
                             pf.http_server = sv
                             pf.http_title = title
@@ -563,8 +649,9 @@ async def main() -> None:
 
     report = ScanReport(
         target_domain=args.domain,
-        nameserver=args.ns,
-        axfr_success=axfr_ok,
+        nameservers_used=ns_ips,
+        nameserver_success=ns_success,
+        axfr_success=True,
         discovered_names=names,
         discovered_ips=ips,
         ports_profile=args.port_profile,
@@ -579,7 +666,8 @@ async def main() -> None:
     write_json(json_path, report)
     write_csv(csv_path, report)
 
-    print(f"[+] AXFR success: {axfr_ok}")
+    print(f"[+] NS IPs tried: {len(ns_ips)}")
+    print(f"[+] AXFR success: True (NS: {ns_success})")
     print(f"[+] Names discovered: {len(names)} | IPs resolved: {len(ips)}")
     print(f"[+] Ports profile: {args.port_profile} | Ports count: {len(ports)}")
     print(f"[+] Hosts scanned: {len(hosts_reports)}")
