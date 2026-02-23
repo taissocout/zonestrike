@@ -2,18 +2,20 @@
 # -*- coding: utf-8 -*-
 
 """
-ZoneStrike v1.5.1 — AXFR + TCP Port Scan + Rich Reports (JSON/CSV/HTML)
+ZoneStrike v1.5.2 — AXFR + TCP Port Scan + Rich Reports (JSON/CSV/HTML)
 
 Legal: Use ONLY with explicit authorization.
 
-Key features:
+Highlights:
 - NS auto-discovery OR explicit --ns (IP/hostname)
 - AXFR attempt across NS candidates
 - A-record resolve with fallback (NS -> system resolver)
 - Two-phase scan (open ports -> enrichment only for open ports)
-- Safe scanning for "all ports" using Queue workers (no 65k tasks explosion)
+- SAFE scanning for "all ports" using Queue workers (no 65k tasks explosion)
 - nmap-services mapping + banner parsing + evidence/confidence fields
-- Rich HTML reports (index + per-host) in --html-dir and clickable file:// link printed
+- Rich HTML reports (index + per-host) in --html-dir + clickable file:// link printed
+- Index now includes a "Service Matrix (Host → Port/Service)" grouped by FQDN
+  (fixes duplicates like dev.businesscorp.com.br across many IPs)
 - Guardrails: --max-hosts, --max-ports, --max-total-seconds, --max-host-seconds
 - Terminal summary: --summary
 """
@@ -26,7 +28,6 @@ import os
 import random
 import re
 import ssl
-import sys
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,7 +38,7 @@ import dns.query
 import dns.resolver
 import dns.zone
 
-VERSION = "1.5.1"
+VERSION = "1.5.2"
 
 BANNER = r"""
 ███████╗ ██████╗ ███╗   ██╗███████╗███████╗████████╗██████╗ ██╗██╗  ██╗███████╗
@@ -47,7 +48,7 @@ BANNER = r"""
 ███████╗╚██████╔╝██║ ╚████║███████╗███████║   ██║   ██║  ██║██║██║  ██╗███████╗
 ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝
 
-ZoneStrike v1.5.1 — AXFR + Port Scan + Rich Reporting
+ZoneStrike v1.5.2 — AXFR + Port Scan + Rich Reporting
 Use ONLY with explicit authorization.
 """
 
@@ -163,6 +164,9 @@ def html_escape(s: str) -> str:
 
 def clamp_int(v: int, lo: int, hi: int) -> int:
     return max(lo, min(hi, v))
+
+def is_ipv4(s: str) -> bool:
+    return bool(re.match(r"^\d{1,3}(\.\d{1,3}){3}$", s))
 
 
 # -------------------- nmap-services helpers --------------------
@@ -360,7 +364,7 @@ async def run_with_timeout(coro, seconds: float, label: str) -> Tuple[bool, Opti
         return False, None, f"error: {label}: {e}"
 
 
-# -------------------- Scan Phase 1 (SAFE workers, no task explosion) --------------------
+# -------------------- Scan Phase 1 (SAFE workers) --------------------
 async def try_connect(host: str, port: int, timeout: float) -> bool:
     try:
         _reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=timeout)
@@ -404,7 +408,7 @@ async def scan_open_ports(host: str, ports: List[int], concurrency: int, timeout
     return open_ports
 
 
-# -------------------- Service identification (banner parsing + defaults) --------------------
+# -------------------- Service identification --------------------
 def identify_from_banner(banner: str) -> Dict[str, Optional[str]]:
     b = banner or ""
 
@@ -484,7 +488,7 @@ async def grab_banner(host: str, port: int, timeout: float) -> Optional[str]:
 
 async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeout: float) -> Tuple[Optional[int], Optional[str], Optional[str]]:
     """
-    Note: UA is used only for HTTP probe (not for TCP connect scans).
+    UA is used only for HTTP probe (not for TCP connect scans).
     """
     try:
         ssl_ctx = None
@@ -521,7 +525,7 @@ async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeo
             server = m.group(1).strip()
 
         title = None
-        # Optional GET to get title (best effort, keep it small)
+        # Small GET to fetch title (best effort)
         try:
             reader2, writer2 = await asyncio.wait_for(asyncio.open_connection(host, port, ssl=ssl_ctx), timeout=timeout)
             req2 = (
@@ -656,10 +660,15 @@ def compute_insights(report: ScanReport) -> Dict[str, object]:
     port_count: Dict[int, int] = {}
     svc_count: Dict[str, int] = {}
     banners: Set[str] = set()
+
+    # IMPORTANT: group by FQDN for "most exposed"
+    grouped = group_hosts_by_name(report)
     most_exposed: List[Tuple[str, int]] = []
+    for name, hrs in grouped.items():
+        merged = merge_group(name, hrs)
+        most_exposed.append((name, merged["count"]))
 
     for hr in report.hosts:
-        most_exposed.append(((hr.resolved_name or hr.host), len(hr.open_ports)))
         for pf in hr.open_ports:
             port_count[pf.port] = port_count.get(pf.port, 0) + 1
             if pf.service_name:
@@ -677,6 +686,68 @@ def compute_insights(report: ScanReport) -> Dict[str, object]:
         "top_services": top_svcs,
         "unique_banners": sorted(list(banners))[:25],
         "most_exposed": most_exposed,
+    }
+
+def group_hosts_by_name(report: ScanReport) -> Dict[str, List[HostReport]]:
+    """
+    Group HostReport items by resolved_name (fallback to IP if no name).
+    """
+    groups: Dict[str, List[HostReport]] = {}
+    for hr in report.hosts:
+        key = hr.resolved_name or hr.host
+        groups.setdefault(key, []).append(hr)
+    return groups
+
+def merge_group(group_name: str, hrs: List[HostReport]) -> Dict[str, object]:
+    """
+    Merge multiple HostReports that represent the same FQDN across many IPs.
+    Returns a summary dict with:
+      name, ips, ports (sorted), best_by_port (best finding per port), count
+    """
+    ips = sorted({h.host for h in hrs})
+    all_findings: List[PortFinding] = []
+    for h in hrs:
+        all_findings.extend(h.open_ports)
+
+    def score(pf: PortFinding) -> int:
+        ev = (pf.evidence or "").lower()
+        conf = (pf.confidence or "").lower()
+        s = 0
+        if ev == "banner":
+            s += 30
+        elif ev == "http":
+            s += 20
+        elif ev == "nmap-services":
+            s += 10
+        if conf == "high":
+            s += 7
+        elif conf == "medium":
+            s += 4
+        elif conf == "low":
+            s += 1
+        if pf.product:
+            s += 2
+        if pf.version:
+            s += 2
+        if pf.http_server:
+            s += 1
+        if pf.http_title:
+            s += 1
+        return s
+
+    best_by_port: Dict[int, PortFinding] = {}
+    for pf in all_findings:
+        cur = best_by_port.get(pf.port)
+        if cur is None or score(pf) > score(cur):
+            best_by_port[pf.port] = pf
+
+    ports = sorted(best_by_port.keys())
+    return {
+        "name": group_name,
+        "ips": ips,
+        "ports": ports,
+        "best_by_port": best_by_port,
+        "count": len(ports),
     }
 
 def build_host_html(report: ScanReport, host: HostReport) -> str:
@@ -775,6 +846,46 @@ def build_host_html(report: ScanReport, host: HostReport) -> str:
 def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]]) -> str:
     insights = compute_insights(report)
 
+    # Group by resolved_name to avoid duplicates in "Most Exposed" and to show host->port->service
+    groups = group_hosts_by_name(report)
+    merged = [merge_group(name, hrs) for name, hrs in groups.items()]
+    merged.sort(key=lambda x: (-x["count"], x["name"]))
+
+    # Service Matrix rows (grouped)
+    matrix_rows = []
+    for g in merged:
+        name = g["name"]
+        ips = ", ".join(g["ips"])
+        ports = g["ports"]
+        best_by_port: Dict[int, PortFinding] = g["best_by_port"]
+
+        compact = []
+        for p in ports[:30]:  # avoid huge lines
+            pf = best_by_port[p]
+            svc = pf.service_name or ""
+            prod = pf.product or ""
+            ver = pf.version or ""
+            extra = ""
+            if prod and ver:
+                extra = f" ({prod} {ver})"
+            elif prod:
+                extra = f" ({prod})"
+            compact.append(f"{p}/{svc}{extra}")
+
+        more = ""
+        if len(ports) > 30:
+            more = f" +{len(ports)-30} more"
+
+        matrix_rows.append(
+            "<tr>"
+            f"<td>{html_escape(name)}</td>"
+            f"<td class='mono'>{html_escape(ips)}</td>"
+            f"<td class='mono'>{html_escape('; '.join(compact) + more)}</td>"
+            f"<td class='mono'>{len(ports)}</td>"
+            "</tr>"
+        )
+
+    # Hosts per IP (links to per-host html files)
     host_rows = []
     for rel_file, hr in host_files:
         host_label = hr.resolved_name or hr.host
@@ -796,9 +907,16 @@ def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]
         f"<tr><td class='mono'>{html_escape(s)}</td><td class='mono'>{c}</td></tr>" for s, c in insights["top_services"]
     ) or "<tr><td colspan='2'>None</td></tr>"
 
-    most_exposed_rows = "".join(
-        f"<tr><td>{html_escape(h)}</td><td class='mono'>{c}</td></tr>" for h, c in insights["most_exposed"]
-    ) or "<tr><td colspan='2'>None</td></tr>"
+    # Most exposed (grouped)
+    most_exposed_rows = ""
+    for name, count in insights["most_exposed"]:
+        ips = ", ".join(merge_group(name, groups.get(name, [])).get("ips", []))
+        most_exposed_rows += (
+            f"<tr><td>{html_escape(name)}</td><td class='mono'>{count}</td></tr>"
+            f"<tr><td class='small mono' colspan='2'>IPs: {html_escape(ips)}</td></tr>"
+        )
+    if not most_exposed_rows:
+        most_exposed_rows = "<tr><td colspan='2'>None</td></tr>"
 
     unique_banners = insights["unique_banners"]
     banners_html = "".join(f"<li><span class='mono'>{html_escape(b)}</span></li>" for b in unique_banners) or "<li>None</li>"
@@ -853,14 +971,15 @@ def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]
       <table><thead><tr><th>Port</th><th>Hosts</th></tr></thead><tbody>{top_ports_rows}</tbody></table>
     </div>
     <div class="card">
-      <h3>Top Services</h3>
+      <h3>Top Services (aggregated)</h3>
+      <div class="small" style="margin-bottom:8px;">Overall frequency. See “Service Matrix” for host → port → service.</div>
       <table><thead><tr><th>Service</th><th>Count</th></tr></thead><tbody>{top_services_rows}</tbody></table>
     </div>
   </div>
 
   <div class="grid2">
     <div class="card">
-      <h3>Most Exposed Hosts</h3>
+      <h3>Most Exposed Hosts (grouped by FQDN)</h3>
       <table><thead><tr><th>Host</th><th>Open ports</th></tr></thead><tbody>{most_exposed_rows}</tbody></table>
     </div>
     <div class="card">
@@ -871,7 +990,17 @@ def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]
   </div>
 
   <div class="card">
-    <h2>Hosts</h2>
+    <h2>Service Matrix (Host → Port/Service)</h2>
+    <div class="small" style="margin-bottom:8px;">Grouped by hostname. Picks best evidence per port (banner/http first, then nmap-services).</div>
+    <table>
+      <thead><tr><th>Host</th><th>IPs</th><th>Ports / Service (Product/Version)</th><th>Count</th></tr></thead>
+      <tbody>{''.join(matrix_rows) if matrix_rows else '<tr><td colspan="4">No hosts.</td></tr>'}</tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Hosts (per IP)</h2>
+    <div class="small" style="margin-bottom:8px;">Each row is one scanned IP. Click to open per-host report.</div>
     <table>
       <thead><tr><th>Host</th><th>IP</th><th>Open ports</th><th>Count</th></tr></thead>
       <tbody>{''.join(host_rows) if host_rows else '<tr><td colspan="4">No hosts.</td></tr>'}</tbody>
@@ -885,6 +1014,7 @@ def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]
     </div>
     <div class="small"><strong>Legal:</strong> authorized testing only.</div>
   </div>
+
 </body>
 </html>"""
 
@@ -913,7 +1043,7 @@ def write_html_reports(out_base: str, html_dir: str, report: ScanReport) -> Tupl
 def print_summary(report: ScanReport) -> None:
     insights = compute_insights(report)
     print("\n[+] Summary:")
-    print(f"    - Hosts: {len(report.hosts)} | Unique IPs: {len(report.discovered_ips)} | Names: {len(report.discovered_names)}")
+    print(f"    - Hosts (per IP scanned): {len(report.hosts)} | Unique IPs: {len(report.discovered_ips)} | Names: {len(report.discovered_names)}")
     if insights["top_ports"]:
         top_ports = ", ".join(f"{p}({c})" for p, c in insights["top_ports"][:8])
         print(f"    - Top ports: {top_ports}")
@@ -922,7 +1052,7 @@ def print_summary(report: ScanReport) -> None:
         print(f"    - Top services: {top_svcs}")
     if insights["most_exposed"]:
         h, c = insights["most_exposed"][0]
-        print(f"    - Most exposed: {h} ({c} open ports)")
+        print(f"    - Most exposed (grouped): {h} ({c} open ports)")
     print("")
 
 
@@ -938,7 +1068,7 @@ async def main() -> None:
     ap.add_argument("--ports-file", default="", help="Used with file.")
     ap.add_argument("--nmap-services-path", default="", help="Path to nmap-services (optional).")
 
-    # Defaults lowered a bit to reduce accidental overload
+    # Defaults lowered to reduce accidental overload
     ap.add_argument("--host-concurrency", type=int, default=10, help="Hosts in parallel (phase 1)")
     ap.add_argument("--port-concurrency", type=int, default=200, help="Ports per host in parallel (phase 1)")
     ap.add_argument("--timeout", type=float, default=1.2, help="TCP connect timeout seconds (phase 1)")
@@ -987,7 +1117,6 @@ async def main() -> None:
 
     # Ports selection
     ports = select_ports(args.port_profile, args.ports, args.ports_file, nmap_path)
-
     if args.max_ports and args.max_ports > 0:
         ports = ports[:max(1, args.max_ports)]
 
@@ -997,8 +1126,7 @@ async def main() -> None:
 
     if args.ns.strip():
         ns_used = [args.ns.strip()]
-        # user might pass hostname; resolve to IPs
-        if re.match(r"^\d{1,3}(\.\d{1,3}){3}$", args.ns.strip()):
+        if is_ipv4(args.ns.strip()):
             ns_ips = [args.ns.strip()]
         else:
             ns_ips = resolve_ns_to_ip(args.ns.strip(), timeout=float(args.dns_timeout))
@@ -1088,7 +1216,7 @@ async def main() -> None:
         for fqdn in sorted(name_to_ips.keys()):
             iplist = name_to_ips.get(fqdn, [])
             print(f"    - {fqdn} -> {', '.join(iplist) if iplist else '(no A record)'}")
-        print(f"[+] Unique IPs: {len(ips)}\n")
+        print(f"[+] Unique IPs (after limits): {len(ips)}\n")
 
     async def do_scan() -> List[HostReport]:
         host_sem = asyncio.Semaphore(clamp_int(args.host_concurrency, 1, 200))
@@ -1189,7 +1317,7 @@ async def main() -> None:
     print(f"[+] AXFR success: True (NS: {ns_success})")
     print(f"[+] Names discovered: {len(names)} | Unique IPs resolved: {len(ips)}")
     print(f"[+] Ports profile: {args.port_profile} | Ports count: {len(ports)}")
-    print(f"[+] Hosts scanned: {len(report.hosts)}")
+    print(f"[+] Hosts scanned (per IP): {len(report.hosts)}")
     print(f"[+] Report written: {json_path} and {csv_path}")
 
     if args.html:

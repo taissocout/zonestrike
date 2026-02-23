@@ -29,14 +29,13 @@
   "discovered_ips": [
     "37.59.174.225",
     "37.59.174.226",
-    "3.5.233.8",
-    "16.12.2.46",
-    "3.5.234.182",
-    "3.5.233.101",
+    "3.5.233.29",
     "3.5.232.43",
-    "3.5.232.194",
-    "3.5.232.5",
-    "3.5.234.142",
+    "3.5.234.226",
+    "52.95.163.51",
+    "16.12.2.58",
+    "3.5.234.239",
+    "16.12.2.14",
     "185.199.108.153",
     "185.199.109.153",
     "185.199.110.153",
@@ -53,7 +52,74 @@
   "ports_count": 100,
   "hosts": [
     {
-      "host": "16.12.2.46",
+      "host": "16.12.2.14",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 443,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "https",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 444,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "snpp",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 445,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "microsoft-ds",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    },
+    {
+      "host": "16.12.2.58",
       "resolved_name": "dev.businesscorp.com.br",
       "open_ports": [
         {
@@ -342,88 +408,6 @@
       "errors": []
     },
     {
-      "host": "3.5.232.194",
-      "resolved_name": "dev.businesscorp.com.br",
-      "open_ports": [
-        {
-          "port": 80,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "http",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        },
-        {
-          "port": 443,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "https",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        },
-        {
-          "port": 444,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "snpp",
-          "product": null,
-          "version": null,
-          "os_hint": null,
-          "confidence": "low",
-          "evidence": "nmap-services",
-          "banner": null,
-          "http_status": null,
-          "http_server": null,
-          "http_title": null
-        },
-        {
-          "port": 445,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "microsoft-ds",
-          "product": null,
-          "version": null,
-          "os_hint": null,
-          "confidence": "low",
-          "evidence": "nmap-services",
-          "banner": null,
-          "http_status": null,
-          "http_server": null,
-          "http_title": null
-        },
-        {
-          "port": 8080,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "http",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        }
-      ],
-      "errors": []
-    },
-    {
       "host": "3.5.232.43",
       "resolved_name": "dev.businesscorp.com.br",
       "open_ports": [
@@ -506,7 +490,7 @@
       "errors": []
     },
     {
-      "host": "3.5.232.5",
+      "host": "3.5.233.29",
       "resolved_name": "dev.businesscorp.com.br",
       "open_ports": [
         {
@@ -588,7 +572,7 @@
       "errors": []
     },
     {
-      "host": "3.5.233.101",
+      "host": "3.5.234.226",
       "resolved_name": "dev.businesscorp.com.br",
       "open_ports": [
         {
@@ -670,171 +654,7 @@
       "errors": []
     },
     {
-      "host": "3.5.233.8",
-      "resolved_name": "dev.businesscorp.com.br",
-      "open_ports": [
-        {
-          "port": 80,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "http",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        },
-        {
-          "port": 443,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "https",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        },
-        {
-          "port": 444,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "snpp",
-          "product": null,
-          "version": null,
-          "os_hint": null,
-          "confidence": "low",
-          "evidence": "nmap-services",
-          "banner": null,
-          "http_status": null,
-          "http_server": null,
-          "http_title": null
-        },
-        {
-          "port": 445,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "microsoft-ds",
-          "product": null,
-          "version": null,
-          "os_hint": null,
-          "confidence": "low",
-          "evidence": "nmap-services",
-          "banner": null,
-          "http_status": null,
-          "http_server": null,
-          "http_title": null
-        },
-        {
-          "port": 8080,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "http",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        }
-      ],
-      "errors": []
-    },
-    {
-      "host": "3.5.234.142",
-      "resolved_name": "dev.businesscorp.com.br",
-      "open_ports": [
-        {
-          "port": 80,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "http",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        },
-        {
-          "port": 443,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "https",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        },
-        {
-          "port": 444,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "snpp",
-          "product": null,
-          "version": null,
-          "os_hint": null,
-          "confidence": "low",
-          "evidence": "nmap-services",
-          "banner": null,
-          "http_status": null,
-          "http_server": null,
-          "http_title": null
-        },
-        {
-          "port": 445,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "microsoft-ds",
-          "product": null,
-          "version": null,
-          "os_hint": null,
-          "confidence": "low",
-          "evidence": "nmap-services",
-          "banner": null,
-          "http_status": null,
-          "http_server": null,
-          "http_title": null
-        },
-        {
-          "port": 8080,
-          "proto": "tcp",
-          "state": "open",
-          "service_name": "http",
-          "product": "AmazonS3",
-          "version": null,
-          "os_hint": null,
-          "confidence": "medium",
-          "evidence": "http",
-          "banner": null,
-          "http_status": 405,
-          "http_server": "AmazonS3",
-          "http_title": null
-        }
-      ],
-      "errors": []
-    },
-    {
-      "host": "3.5.234.182",
+      "host": "3.5.234.239",
       "resolved_name": "dev.businesscorp.com.br",
       "open_ports": [
         {
@@ -1186,9 +1006,76 @@
       "resolved_name": "srvkey.businesscorp.com.br",
       "open_ports": [],
       "errors": []
+    },
+    {
+      "host": "52.95.163.51",
+      "resolved_name": "dev.businesscorp.com.br",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "http",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 443,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "https",
+          "product": "AmazonS3",
+          "version": null,
+          "os_hint": null,
+          "confidence": "medium",
+          "evidence": "http",
+          "banner": null,
+          "http_status": 405,
+          "http_server": "AmazonS3",
+          "http_title": null
+        },
+        {
+          "port": 444,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "snpp",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        },
+        {
+          "port": 445,
+          "proto": "tcp",
+          "state": "open",
+          "service_name": "microsoft-ds",
+          "product": null,
+          "version": null,
+          "os_hint": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
     }
   ],
-  "started_at": "2026-02-23T22:30:46.169889+00:00",
-  "finished_at": "2026-02-23T22:31:20.377839+00:00",
-  "version": "1.5.1"
+  "started_at": "2026-02-23T22:40:54.506768+00:00",
+  "finished_at": "2026-02-23T22:41:10.310254+00:00",
+  "version": "1.5.2"
 }
