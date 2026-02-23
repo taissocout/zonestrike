@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-ZoneStrike — AXFR Discovery + TCP Port Scan + Reporting
+ZoneStrike — AXFR Discovery + TCP Port Scan + Reporting (JSON/CSV/HTML)
 
 Author: (coloque seu nome/handle aqui)
 Credits:
@@ -66,8 +66,8 @@ class HostReport:
 @dataclass
 class ScanReport:
     target_domain: str
-    nameservers_used: List[str]          # IPs that were tried
-    nameserver_success: Optional[str]    # IP that succeeded AXFR (if any)
+    nameservers_used: List[str]
+    nameserver_success: Optional[str]
     axfr_success: bool
     discovered_names: List[str]
     discovered_ips: List[str]
@@ -76,7 +76,7 @@ class ScanReport:
     hosts: List[HostReport]
     started_at: str
     finished_at: str
-    version: str = "1.1.0"
+    version: str = "1.2.0"
 
 
 # -------------------- Constants --------------------
@@ -163,12 +163,12 @@ def find_nmap_services_file(custom_path: Optional[str] = None) -> str:
         p = Path(custom_path)
         if p.exists():
             return str(p)
-        raise FileNotFoundError(f"nmap-services não encontrado em {custom_path}")
+        raise FileNotFoundError(f"nmap-services not found at {custom_path}")
 
     for p in DEFAULT_NMAP_SERVICES_PATHS:
         if Path(p).exists():
             return p
-    raise FileNotFoundError("nmap-services não encontrado. Instale nmap ou informe --nmap-services-path")
+    raise FileNotFoundError("nmap-services not found. Install nmap or use --nmap-services-path")
 
 def top_ports_from_nmap_services(n: int, proto: str = "tcp", path: Optional[str] = None) -> List[int]:
     services_path = find_nmap_services_file(path)
@@ -210,24 +210,34 @@ def select_ports(profile: str, custom: str, ports_file: str, nmap_services_path:
         return list(range(1, 65536))
     if profile == "custom":
         if not custom:
-            raise ValueError("Use --ports quando --port-profile=custom")
+            raise ValueError("Use --ports when --port-profile=custom")
         return parse_ports(custom)
     if profile == "file":
         if not ports_file:
-            raise ValueError("Use --ports-file quando --port-profile=file")
+            raise ValueError("Use --ports-file when --port-profile=file")
         ports = load_ports_from_file(ports_file)
         if not ports:
-            raise ValueError("Arquivo de portas vazio ou inválido.")
+            raise ValueError("Ports file is empty/invalid.")
         return ports
-    raise ValueError("Perfil de portas inválido")
+    raise ValueError("Invalid port profile")
+
+
+def html_escape(s: str) -> str:
+    return (
+        s.replace("&", "&amp;")
+         .replace("<", "&lt;")
+         .replace(">", "&gt;")
+         .replace('"', "&quot;")
+         .replace("'", "&#39;")
+    )
+
+def safe_filename(s: str) -> str:
+    # keep letters/numbers/.-_ ; replace other chars with underscore
+    return re.sub(r"[^a-zA-Z0-9._-]+", "_", s)
 
 
 # -------------------- NS Discovery (AUTO) --------------------
 def discover_authoritative_ns_ips(domain: str, timeout: float = 3.0) -> List[str]:
-    """
-    Discovers NS names for the domain and resolves them to A/AAAA.
-    Returns list of IPs (unique, ordered).
-    """
     r = dns.resolver.Resolver()
     r.timeout = timeout
     r.lifetime = timeout
@@ -241,13 +251,11 @@ def discover_authoritative_ns_ips(domain: str, timeout: float = 3.0) -> List[str
 
     ips: List[str] = []
     for ns in ns_names:
-        # A
         try:
             a = r.resolve(ns, "A")
             ips.extend([rr.to_text() for rr in a])
         except Exception:
             pass
-        # AAAA
         try:
             aaaa = r.resolve(ns, "AAAA")
             ips.extend([rr.to_text() for rr in aaaa])
@@ -259,9 +267,6 @@ def discover_authoritative_ns_ips(domain: str, timeout: float = 3.0) -> List[str
 
 # -------------------- AXFR --------------------
 def do_axfr(domain: str, nameserver_ip: str, timeout: float = 6.0) -> Tuple[bool, List[str], str]:
-    """
-    Returns (success, fqdn_names, error_message)
-    """
     try:
         xfr = dns.query.xfr(where=nameserver_ip, zone=domain, timeout=timeout, lifetime=timeout)
         z = dns.zone.from_xfr(xfr)
@@ -275,10 +280,6 @@ def do_axfr(domain: str, nameserver_ip: str, timeout: float = 6.0) -> Tuple[bool
         return False, [], str(e)
 
 def resolve_names_to_ips(names: List[str], resolver_nameserver_ip: str, timeout: float = 3.0) -> Dict[str, List[str]]:
-    """
-    Resolve A records using a specific nameserver (by IP).
-    Returns mapping name -> list of IPs.
-    """
     r = dns.resolver.Resolver(configure=False)
     r.nameservers = [resolver_nameserver_ip]
     r.timeout = timeout
@@ -424,7 +425,7 @@ async def http_probe(host: str, port: int, use_tls: bool, user_agent: str, timeo
         return None, None, None
 
 
-# -------------------- Reporting --------------------
+# -------------------- Reporting (JSON/CSV) --------------------
 def write_json(path: str, report: ScanReport) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(asdict(report), f, ensure_ascii=False, indent=2)
@@ -454,13 +455,193 @@ def write_csv(path: str, report: ScanReport) -> None:
                 ])
 
 
+# -------------------- Reporting (HTML) --------------------
+def build_host_html(report: ScanReport, host: HostReport) -> str:
+    host_id = host.resolved_name or host.host
+    title = f"ZoneStrike Report — {report.target_domain} — {host_id}"
+
+    # Ports table rows (banner shown as last column)
+    rows = []
+    for pf in host.open_ports:
+        banner = pf.banner or ""
+        # keep banners at the end (as requested)
+        rows.append(
+            "<tr>"
+            f"<td>{pf.port}</td>"
+            f"<td>{html_escape(pf.proto)}</td>"
+            f"<td>{html_escape(pf.state)}</td>"
+            f"<td>{html_escape(pf.service_guess or '')}</td>"
+            f"<td>{html_escape(str(pf.http_status) if pf.http_status is not None else '')}</td>"
+            f"<td>{html_escape(pf.http_server or '')}</td>"
+            f"<td>{html_escape(pf.http_title or '')}</td>"
+            f"<td><code>{html_escape(banner)}</code></td>"
+            "</tr>"
+        )
+
+    errors_html = ""
+    if host.errors:
+        items = "".join(f"<li><code>{html_escape(e)}</code></li>" for e in host.errors)
+        errors_html = f"<h3>Errors</h3><ul>{items}</ul>"
+
+    summary_ports = ", ".join(str(p.port) for p in host.open_ports) if host.open_ports else "None"
+
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{html_escape(title)}</title>
+<style>
+  body {{ font-family: Arial, sans-serif; margin: 24px; }}
+  .meta {{ color: #333; margin-bottom: 16px; }}
+  .card {{ border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 16px 0; }}
+  table {{ width: 100%; border-collapse: collapse; }}
+  th, td {{ border-bottom: 1px solid #eee; text-align: left; padding: 8px; vertical-align: top; }}
+  th {{ background: #fafafa; }}
+  code {{ white-space: pre-wrap; word-break: break-word; }}
+  .pill {{ display:inline-block; padding:2px 8px; border-radius:999px; background:#f2f2f2; margin-left:8px; font-size: 12px; }}
+  .small {{ font-size: 12px; color: #555; }}
+</style>
+</head>
+<body>
+  <h1>ZoneStrike Host Report</h1>
+  <div class="meta">
+    <div><strong>Target:</strong> {html_escape(report.target_domain)}</div>
+    <div><strong>Host:</strong> {html_escape(host.host)} {f"<span class='pill'>{html_escape(host.resolved_name)}</span>" if host.resolved_name else ""}</div>
+    <div class="small"><strong>Started:</strong> {html_escape(report.started_at)} | <strong>Finished:</strong> {html_escape(report.finished_at)} | <strong>Version:</strong> {html_escape(report.version)}</div>
+    <div class="small"><strong>AXFR:</strong> {html_escape(str(report.axfr_success))} | <strong>NS success:</strong> {html_escape(report.nameserver_success or "None")}</div>
+    <div class="small"><strong>Open ports:</strong> {html_escape(summary_ports)}</div>
+  </div>
+
+  <div class="card">
+    <h2>Open Ports</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Port</th>
+          <th>Proto</th>
+          <th>State</th>
+          <th>Service</th>
+          <th>HTTP</th>
+          <th>Server</th>
+          <th>Title</th>
+          <th>Banner (last)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {''.join(rows) if rows else '<tr><td colspan="8">No open ports found.</td></tr>'}
+      </tbody>
+    </table>
+  </div>
+
+  {errors_html}
+
+  <hr/>
+  <div class="small">
+    <strong>Credits:</strong> dnspython, Python asyncio<br/>
+    <strong>Legal:</strong> Use ONLY with explicit authorization.
+  </div>
+</body>
+</html>"""
+    return html
+
+def build_index_html(report: ScanReport, host_files: List[Tuple[str, HostReport]]) -> str:
+    title = f"ZoneStrike Report Index — {report.target_domain}"
+    rows = []
+    for filename, hr in host_files:
+        host_label = hr.resolved_name or hr.host
+        open_ports = ", ".join(str(p.port) for p in hr.open_ports) if hr.open_ports else "None"
+        rows.append(
+            "<tr>"
+            f"<td><a href='{html_escape(filename)}'>{html_escape(host_label)}</a></td>"
+            f"<td>{html_escape(hr.host)}</td>"
+            f"<td>{html_escape(open_ports)}</td>"
+            f"<td>{len(hr.open_ports)}</td>"
+            "</tr>"
+        )
+
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{html_escape(title)}</title>
+<style>
+  body {{ font-family: Arial, sans-serif; margin: 24px; }}
+  .meta {{ color: #333; margin-bottom: 16px; }}
+  .card {{ border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 16px 0; }}
+  table {{ width: 100%; border-collapse: collapse; }}
+  th, td {{ border-bottom: 1px solid #eee; text-align: left; padding: 8px; vertical-align: top; }}
+  th {{ background: #fafafa; }}
+  .small {{ font-size: 12px; color: #555; }}
+</style>
+</head>
+<body>
+  <h1>ZoneStrike Report Index</h1>
+  <div class="meta">
+    <div><strong>Target:</strong> {html_escape(report.target_domain)}</div>
+    <div class="small"><strong>Started:</strong> {html_escape(report.started_at)} | <strong>Finished:</strong> {html_escape(report.finished_at)} | <strong>Version:</strong> {html_escape(report.version)}</div>
+    <div class="small"><strong>AXFR:</strong> {html_escape(str(report.axfr_success))} | <strong>NS success:</strong> {html_escape(report.nameserver_success or "None")}</div>
+    <div class="small"><strong>Discovered:</strong> {len(report.discovered_names)} names | {len(report.discovered_ips)} IPs</div>
+  </div>
+
+  <div class="card">
+    <h2>Hosts</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Host (name)</th>
+          <th>IP</th>
+          <th>Open ports</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {''.join(rows) if rows else '<tr><td colspan="4">No hosts.</td></tr>'}
+      </tbody>
+    </table>
+  </div>
+
+  <hr/>
+  <div class="small">
+    <strong>Credits:</strong> dnspython, Python asyncio<br/>
+    <strong>Legal:</strong> Use ONLY with explicit authorization.
+  </div>
+</body>
+</html>"""
+    return html
+
+def write_html_reports(out_base: str, report: ScanReport) -> List[str]:
+    """
+    Writes:
+      - {out_base}_index.html
+      - {out_base}_{host}.html  (host = resolved_name if available else ip)
+    Returns list of written filenames.
+    """
+    written: List[str] = []
+
+    host_files: List[Tuple[str, HostReport]] = []
+    for hr in report.hosts:
+        host_id = hr.resolved_name or hr.host
+        fname = f"{out_base}_{safe_filename(host_id)}.html"
+        html = build_host_html(report, hr)
+        Path(fname).write_text(html, encoding="utf-8")
+        written.append(fname)
+        host_files.append((fname, hr))
+
+    index_name = f"{out_base}_index.html"
+    index_html = build_index_html(report, host_files)
+    Path(index_name).write_text(index_html, encoding="utf-8")
+    written.append(index_name)
+
+    return written
+
+
 # -------------------- Main --------------------
 async def main() -> None:
     ap = argparse.ArgumentParser(description="ZoneStrike — AXFR + TCP Port Scanner (authorized testing only).")
 
     ap.add_argument("--domain", required=True, help="Domain/zone (e.g. example.com)")
-
-    # ns is now optional
     ap.add_argument("--ns", default="", help="Authoritative nameserver IP. If omitted, ZoneStrike auto-discovers NS IPs.")
 
     ap.add_argument("--port-profile", choices=["top100", "top1000", "all", "custom", "file"], default="top1000",
@@ -479,13 +660,13 @@ async def main() -> None:
     ap.add_argument("--axfr-timeout", type=float, default=6.0, help="AXFR timeout seconds")
     ap.add_argument("--dns-timeout", type=float, default=3.0, help="DNS resolve timeout seconds")
 
-    # Optional HTTP probe
     ap.add_argument("--http-probe", action="store_true", help="Simple HTTP probe on open web ports (80/443/8080/8443...).")
-    ap.add_argument("--user-agent", default="ZoneStrike/1.1.0 (authorized testing)",
+    ap.add_argument("--user-agent", default="ZoneStrike/1.2.0 (authorized testing)",
                     help="Fixed User-Agent used ONLY for HTTP probe (not used in TCP port scan).")
     ap.add_argument("--http-timeout", type=float, default=2.0, help="HTTP probe timeout seconds")
 
-    ap.add_argument("--out", default="zonestrike_report", help="Output base name (writes .json and .csv)")
+    ap.add_argument("--out", default="zonestrike_report", help="Output base name (writes .json/.csv and optional HTML)")
+    ap.add_argument("--html", action="store_true", help="Generate HTML reports (per-host + index).")
     ap.add_argument("--no-banner", action="store_true", help="Do not print banner")
 
     args = ap.parse_args()
@@ -505,7 +686,6 @@ async def main() -> None:
     ns_ips = uniq_keep_order(ns_ips)
 
     if not ns_ips:
-        # No NS IPs discovered -> report empty
         finished = now_iso()
         report = ScanReport(
             target_domain=args.domain,
@@ -520,13 +700,15 @@ async def main() -> None:
             started_at=started,
             finished_at=finished,
         )
-        write_json(f"{args.out}.json", report)
-        write_csv(f"{args.out}.csv", report)
+        json_path = f"{args.out}.json"
+        csv_path = f"{args.out}.csv"
+        write_json(json_path, report)
+        write_csv(csv_path, report)
         print("[!] Could not discover any authoritative NS IPs. Check DNS or pass --ns explicitly.")
-        print(f"[+] Report written: {args.out}.json and {args.out}.csv")
+        print(f"[+] Report written: {json_path} and {csv_path}")
         return
 
-    # 1) AXFR: try each NS IP until success
+    # AXFR try each NS
     axfr_ok = False
     names: List[str] = []
     ns_success: Optional[str] = None
@@ -556,16 +738,17 @@ async def main() -> None:
             started_at=started,
             finished_at=finished,
         )
-        write_json(f"{args.out}.json", report)
-        write_csv(f"{args.out}.csv", report)
+        json_path = f"{args.out}.json"
+        csv_path = f"{args.out}.csv"
+        write_json(json_path, report)
+        write_csv(csv_path, report)
         print("[!] AXFR failed on all discovered/provided NS IPs.")
-        # mostra só uma amostra de erros para debug sem poluir
         for e in axfr_errors[:3]:
             print(f"    - {e}")
-        print(f"[+] Report written: {args.out}.json and {args.out}.csv")
+        print(f"[+] Report written: {json_path} and {csv_path}")
         return
 
-    # 2) Resolve A records using the NS that succeeded AXFR
+    # Resolve A records using NS that succeeded
     name_to_ips = resolve_names_to_ips(names, ns_success, timeout=float(args.dns_timeout))
 
     ips: List[str] = []
@@ -579,11 +762,11 @@ async def main() -> None:
             if ip and ip not in ip_to_name:
                 ip_to_name[ip] = n
 
-    # 3) Ports selection
+    # Ports selection
     nmap_path = args.nmap_services_path.strip() or None
     ports = select_ports(args.port_profile, args.ports, args.ports_file, nmap_path)
 
-    # 4) Scan (parallel by host)
+    # Scan
     hosts_reports: List[HostReport] = []
     host_sem = asyncio.Semaphore(args.host_concurrency)
 
@@ -672,6 +855,11 @@ async def main() -> None:
     print(f"[+] Ports profile: {args.port_profile} | Ports count: {len(ports)}")
     print(f"[+] Hosts scanned: {len(hosts_reports)}")
     print(f"[+] Report written: {json_path} and {csv_path}")
+
+    if args.html:
+        written = write_html_reports(args.out, report)
+        # print only the most useful names
+        print(f"[+] HTML written: {len(written)} files (index: {args.out}_index.html)")
 
 
 if __name__ == "__main__":
