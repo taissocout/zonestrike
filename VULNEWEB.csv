@@ -1,2 +1,0 @@
-name,ip,port,proto,state,service,product,version,confidence,evidence,banner,http_status,http_server,http_title
-testphp.vulnweb.com,44.228.249.3,80,tcp,open,http,,,low,nmap-services,,,,
