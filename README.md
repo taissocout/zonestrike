@@ -171,7 +171,7 @@ reports/
 ## Créditos
 
 * **Autor:** Taisso Cout
-* **LinkedIn:** https://www.linkedin.com/in/taissocout_cybersecurity
+* **LinkedIn:** [https://www.linkedin.com/in/taissocout_cybersecurity](https://www.linkedin.com/in/taissocout-cybersecurity/)
 * **GitHub:** https://github.com/taissocout/zonestrike
 
 
