@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ZoneStrike — Report Index — businesscorp.com.br</title>
+<style>
+:root{--bg:#0b0f17;--card:#111827;--muted:#9CA3AF;--text:#E5E7EB;--line:rgba(255,255,255,.08);--a:#60A5FA}
+body{background:var(--bg);color:var(--text);font-family:system-ui,Arial;margin:24px}
+a{color:var(--a)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.k{color:var(--muted);font-size:12px} .v{font-size:22px;font-weight:700;margin-top:6px}
+table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);text-align:left;padding:10px;vertical-align:top}
+th{background:rgba(255,255,255,.03);color:var(--muted);font-size:12px}
+</style></head><body>
+<h1>ZoneStrike — Report Index</h1>
+<div style="color:var(--muted);font-size:12px">
+Target: <span class="mono">businesscorp.com.br</span> | Version: <span class="mono">1.7.2</span>
+</div>
+
+<div class="grid">
+  <div class="card"><div class="k">Top ports</div><div class="v">100</div></div>
+  <div class="card"><div class="k">Discovery (FQDNs)</div><div class="v">8</div></div>
+  <div class="card"><div class="k">Unique IPs</div><div class="v">11</div></div>
+  <div class="card"><div class="k">Hosts scanned</div><div class="v">11</div></div>
+</div>
+
+<div class="card">
+  <h2>Discovery Sources (resolved)</h2>
+  <table>
+    <thead><tr><th>FQDN</th><th>IPs</th><th>Evidence</th></tr></thead>
+    <tbody><tr><td class='mono'>businesscorp.com.br</td><td class='mono'>37.59.174.225</td><td class='mono'>passive:apex</td></tr><tr><td class='mono'>dev.businesscorp.com.br</td><td class='mono'>16.12.1.6, 3.5.232.62, 3.5.234.230, 3.5.234.190, 3.5.232.63, 3.5.234.186, 3.5.233.101</td><td class='mono'>seed:embedded;wordlist:file:wordlist.txt</td></tr><tr><td class='mono'>ftp.businesscorp.com.br</td><td class='mono'>37.59.174.225</td><td class='mono'>wordlist:file:wordlist.txt</td></tr><tr><td class='mono'>intranet.businesscorp.com.br</td><td class='mono'>37.59.174.228</td><td class='mono'>seed:embedded</td></tr><tr><td class='mono'>mail.businesscorp.com.br</td><td class='mono'>37.59.174.227</td><td class='mono'>passive:MX;seed:embedded;wordlist:file:wordlist.txt</td></tr><tr><td class='mono'>ns1.businesscorp.com.br</td><td class='mono'>37.59.174.225</td><td class='mono'>passive:NS;wordlist:file:wordlist.txt</td></tr><tr><td class='mono'>ns2.businesscorp.com.br</td><td class='mono'>37.59.174.226</td><td class='mono'>passive:NS;wordlist:file:wordlist.txt</td></tr><tr><td class='mono'>www.businesscorp.com.br</td><td class='mono'>37.59.174.225</td><td class='mono'>seed:embedded;wordlist:file:wordlist.txt</td></tr></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Hosts</h2>
+  <table>
+    <thead><tr><th>Host</th><th>IP</th><th>Ports (port/service)</th><th>Count</th></tr></thead>
+    <tbody><tr><td><a href='TESTFINAL_businesscorp.com.br_37.59.174.225.html'>businesscorp.com.br</a></td><td class='mono'>37.59.174.225</td><td class='mono'>21/ftp, 22/ssh, 53/domain, 80/http, 111/rpcbind</td><td class='mono'>5</td></tr><tr><td><a href='TESTFINAL_dev.businesscorp.com.br_16.12.1.6.html'>dev.businesscorp.com.br</a></td><td class='mono'>16.12.1.6</td><td class='mono'>80/http, 443/https, 444/snpp, 445/microsoft-ds</td><td class='mono'>4</td></tr><tr><td><a href='TESTFINAL_dev.businesscorp.com.br_3.5.232.62.html'>dev.businesscorp.com.br</a></td><td class='mono'>3.5.232.62</td><td class='mono'>80/http, 443/https, 444/snpp, 445/microsoft-ds, 8080/http</td><td class='mono'>5</td></tr><tr><td><a href='TESTFINAL_dev.businesscorp.com.br_3.5.232.63.html'>dev.businesscorp.com.br</a></td><td class='mono'>3.5.232.63</td><td class='mono'>80/http, 443/https, 444/snpp, 445/microsoft-ds, 8080/http</td><td class='mono'>5</td></tr><tr><td><a href='TESTFINAL_dev.businesscorp.com.br_3.5.233.101.html'>dev.businesscorp.com.br</a></td><td class='mono'>3.5.233.101</td><td class='mono'>80/http, 443/https, 444/snpp, 445/microsoft-ds, 8080/http</td><td class='mono'>5</td></tr><tr><td><a href='TESTFINAL_dev.businesscorp.com.br_3.5.234.186.html'>dev.businesscorp.com.br</a></td><td class='mono'>3.5.234.186</td><td class='mono'>80/http, 443/https, 444/snpp, 445/microsoft-ds, 8080/http</td><td class='mono'>5</td></tr><tr><td><a href='TESTFINAL_dev.businesscorp.com.br_3.5.234.190.html'>dev.businesscorp.com.br</a></td><td class='mono'>3.5.234.190</td><td class='mono'>80/http, 443/https, 444/snpp, 445/microsoft-ds, 8080/http</td><td class='mono'>5</td></tr><tr><td><a href='TESTFINAL_dev.businesscorp.com.br_3.5.234.230.html'>dev.businesscorp.com.br</a></td><td class='mono'>3.5.234.230</td><td class='mono'>80/http, 443/https, 444/snpp, 445/microsoft-ds, 8080/http</td><td class='mono'>5</td></tr><tr><td><a href='TESTFINAL_intranet.businesscorp.com.br_37.59.174.228.html'>intranet.businesscorp.com.br</a></td><td class='mono'>37.59.174.228</td><td class='mono'>80/http, 10000/http</td><td class='mono'>2</td></tr><tr><td><a href='TESTFINAL_mail.businesscorp.com.br_37.59.174.227.html'>mail.businesscorp.com.br</a></td><td class='mono'>37.59.174.227</td><td class='mono'>21/ftp, 80/http, 110/pop3, 143/imap</td><td class='mono'>4</td></tr><tr><td><a href='TESTFINAL_ns2.businesscorp.com.br_37.59.174.226.html'>ns2.businesscorp.com.br</a></td><td class='mono'>37.59.174.226</td><td class='mono'>22/ssh, 53/domain, 111/rpcbind</td><td class='mono'>3</td></tr></tbody>
+  </table>
+</div>
+
+<div class="card" style="color:var(--muted);font-size:12px">
+  Started: <span class="mono">2026-02-24T04:15:23.029563+00:00</span> |
+  Finished: <span class="mono">2026-02-24T04:17:25.756578+00:00</span><br/>
+  Credits: Cout — <a href="https://www.linkedin.com/in/SEU_LINKEDIN">LinkedIn</a> • <a href="https://github.com/taissocout/zonestrike">GitHub</a>
+</div>
+</body></html>

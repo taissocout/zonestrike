@@ -1,0 +1,158 @@
+name,ip,port,proto,state,service,product,version,confidence,evidence,banner,http_status,http_server,http_title
+admin.google.com,142.251.133.78,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+admin.google.com,142.251.133.78,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+admin.google.com,2800:3f0:4001:80f::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+admin.google.com,2800:3f0:4001:80f::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+ads.google.com,172.217.30.142,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+ads.google.com,172.217.30.142,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+ads.google.com,2800:3f0:4001:807::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+ads.google.com,2800:3f0:4001:807::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+api.google.com,172.217.29.132,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+api.google.com,172.217.29.132,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+apps.google.com,172.217.162.14,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+apps.google.com,172.217.162.14,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+apps.google.com,2800:3f0:4001:80b::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+apps.google.com,2800:3f0:4001:80b::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+blog.google.com,172.217.30.137,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+blog.google.com,172.217.30.137,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+blog.google.com,2800:3f0:4001:807::2009,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+blog.google.com,2800:3f0:4001:807::2009,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+business.google.com,172.217.29.206,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+business.google.com,172.217.29.206,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+business.google.com,2800:3f0:4001:838::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+business.google.com,2800:3f0:4001:838::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+chat.google.com,172.217.162.238,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+chat.google.com,172.217.162.238,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+chat.google.com,2800:3f0:4001:80d::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+chat.google.com,2800:3f0:4001:80d::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+corp.google.com,108.177.123.129,80,tcp,open,http,,,medium,http,,302,,
+corp.google.com,108.177.123.129,443,tcp,open,https,,,medium,http,,302,,
+corp.google.com,2800:3f0:4003:c0f::81,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+corp.google.com,2800:3f0:4003:c0f::81,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+dns.google.com,2001:4860:4860::8844,53,tcp,open,domain,,,low,nmap-services,,,,
+dns.google.com,2001:4860:4860::8844,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+dns.google.com,2001:4860:4860::8888,53,tcp,open,domain,,,low,nmap-services,,,,
+dns.google.com,2001:4860:4860::8888,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+dns.google.com,8.8.4.4,53,tcp,open,domain,,,low,nmap-services,,,,
+dns.google.com,8.8.4.4,443,tcp,open,https,HTTP server (unknown),,medium,http,,302,HTTP server (unknown),302 Moved
+dns.google.com,8.8.8.8,53,tcp,open,domain,,,low,nmap-services,,,,
+dns.google.com,8.8.8.8,443,tcp,open,https,HTTP server (unknown),,medium,http,,302,HTTP server (unknown),302 Moved
+download.google.com,142.250.78.100,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+download.google.com,142.250.78.100,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+download.google.com,2800:3f0:4001:800::2004,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+download.google.com,2800:3f0:4001:800::2004,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+google.com,172.217.28.206,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+google.com,172.217.28.206,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+google.com,2800:3f0:4001:846::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+google.com,2800:3f0:4001:846::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+health.google.com,172.217.162.174,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+health.google.com,172.217.162.174,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+health.google.com,2800:3f0:4001:80c::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+health.google.com,2800:3f0:4001:80c::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+home.google.com,172.217.29.174,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+home.google.com,172.217.29.174,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+home.google.com,2800:3f0:4001:837::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+home.google.com,2800:3f0:4001:837::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+image.google.com,172.217.30.78,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+image.google.com,172.217.30.78,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+image.google.com,2800:3f0:4001:83c::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+image.google.com,2800:3f0:4001:83c::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+m.google.com,172.217.162.11,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+m.google.com,172.217.162.11,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+m.google.com,2800:3f0:4001:80b::200b,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+m.google.com,2800:3f0:4001:80b::200b,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+mail.google.com,142.250.78.101,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+mail.google.com,142.250.78.101,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+mail.google.com,2800:3f0:4001:800::2005,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+mail.google.com,2800:3f0:4001:800::2005,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+news.google.com,172.217.29.78,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+news.google.com,172.217.29.78,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+news.google.com,2800:3f0:4001:81c::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+news.google.com,2800:3f0:4001:81c::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+ns.google.com,216.239.32.10,53,tcp,open,domain,,,low,nmap-services,,,,
+ns1.google.com,2001:4860:4802:32::a,53,tcp,open,domain,,,low,nmap-services,,,,
+ns2.google.com,2001:4860:4802:34::a,53,tcp,open,domain,,,low,nmap-services,,,,
+ns2.google.com,216.239.34.10,53,tcp,open,domain,,,low,nmap-services,,,,
+ns3.google.com,2001:4860:4802:36::a,53,tcp,open,domain,,,low,nmap-services,,,,
+ns3.google.com,216.239.36.10,53,tcp,open,domain,,,low,nmap-services,,,,
+ns4.google.com,2001:4860:4802:38::a,53,tcp,open,domain,,,low,nmap-services,,,,
+ns4.google.com,216.239.38.10,53,tcp,open,domain,,,low,nmap-services,,,,
+pay.google.com,108.177.123.92,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+pay.google.com,108.177.123.92,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+pay.google.com,2800:3f0:4003:c0f::5c,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+pay.google.com,2800:3f0:4003:c0f::5c,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+photo.google.com,172.217.30.110,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+photo.google.com,172.217.30.110,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+photo.google.com,2800:3f0:4001:847::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+photo.google.com,2800:3f0:4001:847::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+shop.google.com,172.217.192.92,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+shop.google.com,172.217.192.92,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+shop.google.com,2800:3f0:4003:c02::5c,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+shop.google.com,2800:3f0:4003:c02::5c,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+shopping.google.com,142.251.0.92,80,tcp,open,http,gws,,medium,http,,301,gws,301 Moved
+shopping.google.com,142.251.0.92,443,tcp,open,https,gws,,medium,http,,301,gws,301 Moved
+shopping.google.com,2800:3f0:4003:c08::5c,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+shopping.google.com,2800:3f0:4003:c08::5c,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+smtp.google.com,2800:3f0:4003:c01::1a,25,tcp,open,ftp,,,medium,banner,220 mx.google.com ESMTP a1e0cc1a2514c-94dd0e29bcdsi405936241.154 - gsmtp\r\n,,,
+smtp.google.com,2800:3f0:4003:c01::1b,25,tcp,open,ftp,,,medium,banner,220 mx.google.com ESMTP a1e0cc1a2514c-94da89f7c5bsi1838899241.88 - gsmtp\r\n,,,
+smtp.google.com,2800:3f0:4003:c02::1a,25,tcp,open,ftp,,,medium,banner,220 mx.google.com ESMTP a1e0cc1a2514c-94da8b9bbedsi1854788241.137 - gsmtp\r\n,,,
+smtp.google.com,2800:3f0:4003:c02::1b,25,tcp,open,ftp,,,medium,banner,220 mx.google.com ESMTP a1e0cc1a2514c-94da8be50dbsi1837611241.211 - gsmtp\r\n,,,
+support.google.com,172.217.172.142,80,tcp,open,http,,,low,nmap-services,,,,
+support.google.com,172.217.172.142,443,tcp,open,https,,,low,nmap-services,,,,
+support.google.com,2800:3f0:4001:814::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+support.google.com,2800:3f0:4001:814::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+tools.google.com,142.251.134.174,80,tcp,open,http,,,low,nmap-services,,,,
+tools.google.com,142.251.134.174,443,tcp,open,https,,,low,nmap-services,,,,
+tools.google.com,2800:3f0:4001:812::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+tools.google.com,2800:3f0:4001:812::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+upload.google.com,2800:3f0:4001:81c::200f,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+upload.google.com,2800:3f0:4001:81c::200f,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+video.google.com,172.217.29.110,443,tcp,open,https,,,low,nmap-services,,,,
+video.google.com,2800:3f0:4001:835::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+video.google.com,2800:3f0:4001:835::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+wallet.google.com,2800:3f0:4003:c01::5c,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+wallet.google.com,2800:3f0:4003:c01::5c,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+www.google.com,2800:3f0:4001:847::2004,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+www.google.com,2800:3f0:4001:847::2004,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
+www.news,75.2.38.108,7,tcp,open,echo,,,low,nmap-services,,,,
+www.news,75.2.38.108,22,tcp,open,ssh,,,low,nmap-services,,,,
+www.news,75.2.38.108,23,tcp,open,telnet,,,low,nmap-services,,,,
+www.news,75.2.38.108,26,tcp,open,rsftp,,,low,nmap-services,,,,
+www.news,75.2.38.108,37,tcp,open,time,,,low,nmap-services,,,,
+www.news,75.2.38.108,144,tcp,open,news,,,low,nmap-services,,,,
+www.news,75.2.38.108,427,tcp,open,svrloc,,,low,nmap-services,,,,
+www.news,75.2.38.108,465,tcp,open,smtps,,,low,nmap-services,,,,
+www.news,75.2.38.108,515,tcp,open,printer,,,low,nmap-services,,,,
+www.news,75.2.38.108,587,tcp,open,submission,,,low,nmap-services,,,,
+www.news,75.2.38.108,1025,tcp,open,NFS-or-IIS,,,low,nmap-services,,,,
+www.news,75.2.38.108,1026,tcp,open,LSA-or-nterm,,,low,nmap-services,,,,
+www.news,75.2.38.108,1029,tcp,open,ms-lsa,,,low,nmap-services,,,,
+www.news,75.2.38.108,1433,tcp,open,ms-sql-s,,,low,nmap-services,,,,
+www.news,75.2.38.108,5101,tcp,open,admdog,,,low,nmap-services,,,,
+www.news,75.2.38.108,5631,tcp,open,pcanywheredata,,,low,nmap-services,,,,
+www.news,75.2.38.108,8000,tcp,open,http-alt,,,low,nmap-services,,,,
+www.news,75.2.38.108,8443,tcp,open,https-alt,,,low,nmap-services,,,,
+www.news,99.83.155.228,21,tcp,open,ftp,,,low,nmap-services,,,,
+www.news,99.83.155.228,37,tcp,open,time,,,low,nmap-services,,,,
+www.news,99.83.155.228,79,tcp,open,finger,,,low,nmap-services,,,,
+www.news,99.83.155.228,80,tcp,open,http,,,low,nmap-services,,,,
+www.news,99.83.155.228,110,tcp,open,pop3,,,low,nmap-services,,,,
+www.news,99.83.155.228,111,tcp,open,rpcbind,,,low,nmap-services,,,,
+www.news,99.83.155.228,113,tcp,open,ident,,,low,nmap-services,,,,
+www.news,99.83.155.228,135,tcp,open,msrpc,,,low,nmap-services,,,,
+www.news,99.83.155.228,465,tcp,open,smtps,,,low,nmap-services,,,,
+www.news,99.83.155.228,513,tcp,open,login,,,low,nmap-services,,,,
+www.news,99.83.155.228,514,tcp,open,shell,,,low,nmap-services,,,,
+www.news,99.83.155.228,515,tcp,open,printer,,,low,nmap-services,,,,
+www.news,99.83.155.228,631,tcp,open,ipp,,,low,nmap-services,,,,
+www.news,99.83.155.228,1433,tcp,open,ms-sql-s,,,low,nmap-services,,,,
+www.news,99.83.155.228,1720,tcp,open,h323q931,,,low,nmap-services,,,,
+www.news,99.83.155.228,3306,tcp,open,mysql,,,low,nmap-services,,,,
+www.news,99.83.155.228,5666,tcp,open,nrpe,,,low,nmap-services,,,,
+www.news,99.83.155.228,5900,tcp,open,vnc,,,low,nmap-services,,,,
+www.news,99.83.155.228,7070,tcp,open,realserver,,,low,nmap-services,,,,
+www.news,99.83.155.228,8000,tcp,open,http-alt,,,low,nmap-services,,,,
+www.news,99.83.155.228,8888,tcp,open,sun-answerbook,,,low,nmap-services,,,,
+www4.google.com,172.217.28.46,443,tcp,open,https,,,low,nmap-services,,,,
+www4.google.com,2800:3f0:4001:842::200e,80,tcp,open,http,,,medium,http,,400,,Error 400 (Bad Request)!!1
+www4.google.com,2800:3f0:4001:842::200e,443,tcp,open,https,,,medium,http,,400,,Error 400 (Bad Request)!!1
