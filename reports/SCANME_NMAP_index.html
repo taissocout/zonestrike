@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ZoneStrike — Report Index — scanme.nmap.org</title>
+<style>
+:root{--bg:#0b0f17;--card:#111827;--muted:#9CA3AF;--text:#E5E7EB;--line:rgba(255,255,255,.08);--a:#60A5FA}
+body{background:var(--bg);color:var(--text);font-family:system-ui,Arial;margin:24px}
+a{color:var(--a)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.k{color:var(--muted);font-size:12px} .v{font-size:22px;font-weight:700;margin-top:6px}
+table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);text-align:left;padding:10px;vertical-align:top}
+th{background:rgba(255,255,255,.03);color:var(--muted);font-size:12px}
+</style></head><body>
+<h1>ZoneStrike — Report Index</h1>
+<div style="color:var(--muted);font-size:12px">
+Target: <span class="mono">scanme.nmap.org</span> | Version: <span class="mono">1.7.2</span>
+</div>
+
+<div class="grid">
+  <div class="card"><div class="k">Top ports</div><div class="v">100</div></div>
+  <div class="card"><div class="k">Discovery (FQDNs)</div><div class="v">2</div></div>
+  <div class="card"><div class="k">Unique IPs</div><div class="v">4</div></div>
+  <div class="card"><div class="k">Hosts scanned</div><div class="v">4</div></div>
+</div>
+
+<div class="card">
+  <h2>Discovery Sources (resolved)</h2>
+  <table>
+    <thead><tr><th>FQDN</th><th>IPs</th><th>Evidence</th></tr></thead>
+    <tbody><tr><td class='mono'>scanme.nmap.org</td><td class='mono'>45.33.32.156, 2600:3c01::f03c:91ff:fe18:bb2f</td><td class='mono'>passive:apex</td></tr><tr><td class='mono'>www.news</td><td class='mono'>99.83.155.228, 75.2.38.108</td><td class='mono'>wordlist:file:wordlist.txt</td></tr></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Hosts</h2>
+  <table>
+    <thead><tr><th>Host</th><th>IP</th><th>Ports (port/service)</th><th>Count</th></tr></thead>
+    <tbody><tr><td><a href='SCANME_NMAP_scanme.nmap.org_2600_3c01_f03c_91ff_fe18_bb2f.html'>scanme.nmap.org</a></td><td class='mono'>2600:3c01::f03c:91ff:fe18:bb2f</td><td class='mono'>22/ssh, 80/http</td><td class='mono'>2</td></tr><tr><td><a href='SCANME_NMAP_scanme.nmap.org_45.33.32.156.html'>scanme.nmap.org</a></td><td class='mono'>45.33.32.156</td><td class='mono'>22/ssh, 80/http</td><td class='mono'>2</td></tr><tr><td><a href='SCANME_NMAP_www.news_75.2.38.108.html'>www.news</a></td><td class='mono'>75.2.38.108</td><td class='mono'>9/discard, 13/daytime, 21/ftp, 22/ssh, 23/telnet, 26/rsftp, 53/domain, 79/finger, 80/http, 81/hosts2-ns, 88/kerberos-sec, 110/pop3, 111/rpcbind, 113/ident, 135/msrpc, 139/netbios-ssn, 143/imap, 144/news, 199/smux, 443/https, 444/snpp, 445/microsoft-ds, 465/smtps, 514/shell, 543/klogin, 548/afp, 554/rtsp, 587/submission, 631/ipp, 646/ldp, 993/imaps, 995/pop3s, 1026/LSA-or-nterm, 1027/IIS, 1028/unknown, 1433/ms-sql-s, 1720/h323q931, 1723/pptp, 1755/wms, 2717/pn-requester, 3000/ppp, 3128/squid-http, 3306/mysql, 3389/ms-wbt-server, 3986/mapper-ws_ethd, 4899/radmin, 5051/ida-agent, 5060/sip, 5101/admdog, 5631/pcanywheredata, 5800/vnc-http, 5900/vnc, 6001/X11:1, 6646/unknown, 7070/realserver, 8000/http-alt, 8009/ajp13, 8080/http-proxy, 8081/blackice-icecap, 8443/https-alt, 8888/sun-answerbook, 9100/jetdirect, 10000/snet-sensor-mgmt, 32768/filenet-tms, 49153/unknown, 49156/unknown, 49157/unknown</td><td class='mono'>67</td></tr><tr><td><a href='SCANME_NMAP_www.news_99.83.155.228.html'>www.news</a></td><td class='mono'>99.83.155.228</td><td class='mono'>9/discard, 13/daytime, 21/ftp, 23/telnet, 37/time, 53/domain, 79/finger, 80/http, 81/hosts2-ns, 88/kerberos-sec, 106/pop3pw, 110/pop3, 139/netbios-ssn, 143/imap, 144/news, 179/bgp, 199/smux, 443/https, 445/microsoft-ds, 465/smtps, 514/shell, 515/printer, 548/afp, 554/rtsp, 646/ldp, 993/imaps, 995/pop3s, 1110/nfsd-status, 1433/ms-sql-s, 1720/h323q931, 1723/pptp, 1755/wms, 2000/cisco-sccp, 2049/nfs, 2121/ccproxy-ftp, 3000/ppp, 3128/squid-http, 3389/ms-wbt-server, 3986/mapper-ws_ethd, 4899/radmin, 5051/ida-agent, 5190/aol, 5432/postgresql, 5631/pcanywheredata, 6001/X11:1, 6646/unknown, 7070/realserver, 8008/http, 8009/ajp13, 8080/http-proxy, 8888/sun-answerbook, 9100/jetdirect, 32768/filenet-tms, 49154/unknown, 49155/unknown, 49156/unknown, 49157/unknown</td><td class='mono'>57</td></tr></tbody>
+  </table>
+</div>
+
+<div class="card" style="color:var(--muted);font-size:12px">
+  Started: <span class="mono">2026-02-24T04:30:14.223611+00:00</span> |
+  Finished: <span class="mono">2026-02-24T04:37:47.884817+00:00</span><br/>
+  Credits: Cout — <a href="https://www.linkedin.com/in/SEU_LINKEDIN">LinkedIn</a> • <a href="https://github.com/taissocout/zonestrike">GitHub</a>
+</div>
+</body></html>

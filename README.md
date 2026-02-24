@@ -1,222 +1,177 @@
-````markdown
-# ZoneStrike 🔥  
-**AXFR Discovery + TCP Port Scan + Rich Reporting (JSON/CSV/HTML) + Interactive Mode**
+# ZoneStrike
 
-> **ZoneStrike** é uma ferramenta focada em **descoberta de hosts via AXFR (quando permitido)** e **varredura TCP de portas** com geração de relatórios **ricos e clicáveis** (HTML) — ideal para **laboratórios**, **ambientes controlados** e **pentests autorizados**.
+Recon + TCP Port Scan + Reporting (JSON/CSV/HTML) em modo **interativo** e com **saída em tempo real**.
 
-⚠️ **Uso permitido somente com autorização explícita.**  
-O autor não se responsabiliza por uso indevido.
+> **Uso permitido apenas com autorização explícita.**
+> ZoneStrike é uma ferramenta educacional para ambientes controlados/labs e testes autorizados.
 
 ---
 
-## ✨ Features
+## Recursos
 
-✅ **AXFR (Zone Transfer)** para enumerar subdomínios/hosts quando o nameserver permite  
-✅ Resolve **FQDN → IP** com fallback inteligente (NS → resolver do sistema)  
-✅ **Varredura TCP** em **Top N portas** (com base no `nmap-services`)  
-✅ **Escaneia primeiro → enriquece depois** (otimiza tempo e reduz ruído)  
-✅ Enriquecimento opcional:  
-- **Banner grabbing** (quando disponível)  
-- **HTTP probe** (status, server header e `<title>`) em portas web comuns  
-✅ Relatórios:
-- **JSON** (completo e estruturado)
-- **CSV** (para grep, Excel, pandas)
-- **HTML** (**Index + relatório por host**, com links e “Service Matrix”)  
-✅ Modo **interativo** (`--interactive`) para você só digitar **domínio**, **Top N** e **nome do report**  
-✅ **Auto-open** do relatório HTML no browser
+* **Modo interativo**: execute `python3 zonestrike.py` e responda às perguntas.
+* **Discovery (Recon)**
 
----
+  * **Passivo**: consultas DNS leves (NS/MX/TXT + apex)
+  * **Seeds embutidas**: uma lista pequena de subdomínios comuns (ex.: `www`, `dev`, `api`, etc.)
+  * **Wordlist opcional**: arquivo **no mesmo diretório** do `zonestrike.py`
+* **Port Scan TCP** (Top N portas) com base em `nmap-services`
+* **Enrichment**
 
-## 📸 Preview do Report (HTML)
+  * Banner grab (best-effort)
+  * HTTP probe (HEAD/GET) para status, server header e title (best-effort)
+* **Relatórios**
 
-O HTML gera:
-- **Dashboard** com métricas do scan
-- **Top Ports / Top Services**
-- **Most Exposed Hosts**
-- **Service Matrix (Host → Porta/Serviço/Produto/Versão)**
-- Links para **relatório detalhado por host**
+  * `report.json`
+  * `report.csv`
+  * HTML rico em `reports/` com `*_index.html` + páginas por host
+* **Live output**: acompanha discovery, scan e enrich no terminal em tempo real
 
 ---
 
-## ⚙️ Requisitos
+## Requisitos
 
-- Python **3.10+** (recomendado)
-- `dnspython`
-- `nmap-services` (vem com o `nmap`)
+* Python **3.10+** (recomendado)
+* Linux (Kali/Ubuntu etc.)
+* `nmap-services` disponível (instalando o `nmap`)
 
-### Instalar dependências no Kali/Debian:
-```bash
-sudo apt update
-sudo apt install -y python3 python3-venv nmap
-````
+### Dependências Python
+
+* `dnspython`
+
+Arquivo `requirements.txt`:
+
+```txt
+dnspython>=2.6.0
+```
 
 ---
 
-## 🚀 Instalação
-
-### 1) Clone o repositório
+## Instalação
 
 ```bash
 git clone https://github.com/taissocout/zonestrike.git
 cd zonestrike
-```
 
-### 2) Crie o ambiente virtual e instale dependências
-
-```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -U pip
+
 pip install -r requirements.txt
+
+# (recomendado) para garantir nmap-services
+sudo apt update && sudo apt install -y nmap
 ```
 
-> Se você ainda não tiver o `requirements.txt`, crie com:
+---
+
+## Uso (Interativo)
+
+Execute:
 
 ```bash
-echo "dnspython>=2.6.0" > requirements.txt
+python3 zonestrike.py
 ```
+
+O ZoneStrike vai pedir:
+
+1. **Target/domain** (ex.: `businesscorp.com.br`, `lab.local`)
+2. **Top N ports** (ex.: `100`, `300`, `1000`)
+3. **Nome do report** (ex.: `lab_report`)
+4. **Wordlist** (opcional) — deve estar no **mesmo diretório** do `zonestrike.py`
+
+Ao terminar, ele vai gerar:
+
+* `lab_report.json`
+* `lab_report.csv`
+* `reports/lab_report_index.html` (e páginas por host)
+
+E vai imprimir o link:
+
+* `file:///.../reports/lab_report_index.html`
+
+*(Ele também tenta abrir automaticamente no navegador.)*
 
 ---
 
-## ✅ Uso rápido (modo interativo)
+## Wordlist (Opcional)
 
-O modo interativo é o recomendado para o fluxo do dia a dia:
+A wordlist **deve ficar no mesmo diretório** do script:
+
+```
+zonestrike.py
+minha_wordlist.txt
+requirements.txt
+```
+
+Exemplo:
 
 ```bash
-python3 zonestrike.py --interactive
+nano minha_wordlist.txt
 ```
 
-Ele pergunta:
+Você pode inserir:
 
-* **Domínio**
-* **Top N portas** (ex.: 100, 300, 1000)
-* **Nome do report**
-* Se você quer: **enrich**, **http-probe**, **html**, **auto-open**
+* labels (`dev`, `api`, `mail`) → viram `dev.<target>`
+* ou FQDNs completos (`dev.lab.local`) → usados como estão
 
-No final ele:
-
-* cria `.json` e `.csv`
-* gera HTML em `./reports`
-* imprime um link `file://...` clicável
-* abre automaticamente o relatório (se selecionado)
+Depois, ao rodar o ZoneStrike, informe o arquivo quando ele perguntar.
 
 ---
 
-## 🧪 Uso via comando (sem wizard)
+## Saída em tempo real (Live)
 
-### Exemplo: Top 100 portas + enrich + HTML + abrir relatório
+Durante a execução, você verá:
 
-```bash
-python3 zonestrike.py --domain businesscorp.com.br --top 100 \
-  --enrich --http-probe --html --open \
-  --out report --html-dir reports
-```
+* **Discovery** em tempo real:
+  `fqdn -> IPs`
+* **Scan** em tempo real:
 
-### Exemplo: Top 1000 portas (default) e só JSON/CSV
+  * `[SCAN] (x/y) host -> ip`
+  * `[OPEN] host ip:porta/tcp` assim que encontrar
+  * `[..] progress a/b` como “heartbeat”
+  * `[DONE] ... open_ports=N`
+* **Enrich** em tempo real:
 
-```bash
-python3 zonestrike.py --domain businesscorp.com.br --top 1000 --out scan1
-```
-
-### Exemplo: listar hosts resolvidos antes de escanear
-
-```bash
-python3 zonestrike.py --domain businesscorp.com.br --top 100 \
-  --list-hosts --out lab --html --open
-```
+  * `[ENRICH] host ip:porta -> service HTTP:status`
 
 ---
 
-## 🧩 Flags principais
+## Estrutura de arquivos gerados
 
-| Flag                 | Descrição                                           |
-| -------------------- | --------------------------------------------------- |
-| `--interactive`      | Wizard interativo (domínio, topN, report name)      |
-| `--domain`           | Domínio/zona alvo (ex.: `example.com`)              |
-| `--ns`               | Nameserver (IP ou hostname) opcional                |
-| `--top`              | Top N portas (ordem do `nmap-services`)             |
-| `--enrich`           | Enriquecimento (banner, heurísticas de serviço)     |
-| `--http-probe`       | HTTP status/server/title em portas web comuns       |
-| `--html`             | Gera HTML (Index + per-host)                        |
-| `--html-dir`         | Pasta do HTML (default: `reports`)                  |
-| `--open`             | Abre automaticamente o HTML no browser              |
-| `--out`              | Nome base do report (gera `.json`, `.csv`, `.html`) |
-| `--host-concurrency` | Hosts paralelos (default: 10)                       |
-| `--port-concurrency` | Portas paralelas por host (default: 200)            |
-| `--timeout`          | Timeout TCP (default: 1.2s)                         |
+Exemplo após um run:
 
----
-
-## 📦 Saídas geradas
-
-Se `--out report`:
-
-* `report.json` → relatório completo (estruturado)
-* `report.csv` → export para grep/Excel/pandas
-* `reports/report_index.html` → dashboard do scan (clicável)
-* `reports/report_<host>.html` → detalhado por host
-
-> O **Index** agrega por hostname e mostra **Service Matrix** com:
-> `host → portas/serviços → produto/versão (quando houver evidência)`
-
----
-
-## 🔎 Dicas para análise rápida
-
-### Grep por portas específicas:
-
-```bash
-grep ",22,tcp,open" report.csv
 ```
-
-### Filtrar por serviço:
-
-```bash
-grep ",http," report.csv
-```
-
-### Ver só hosts com mais exposição:
-
-```bash
-cut -d, -f1,3,6 report.csv | sort | uniq -c | sort -nr | head
+lab_report.json
+lab_report.csv
+reports/
+  lab_report_index.html
+  lab_report_dev.lab.local_10.0.0.10.html
+  lab_report_mail.lab.local_10.0.0.20.html
 ```
 
 ---
 
-## 🛡️ Boas práticas e segurança (IMPORTANTE)
+## Dicas de uso em laboratório
 
-* Execute **somente em ambientes autorizados** (labs / clientes com permissão).
-* Comece com `--top 100` e vá aumentando conforme necessidade.
-* Use `--timeout` e `--port-concurrency` moderados para não causar overload.
-* Em ambientes reais: registre autorização, escopo, e janela de teste.
-
----
-
-## 🧠 Roadmap (próximas versões)
-
-* [ ] Exportar relatório **Markdown** para anexar em relatório técnico
-* [ ] “Risk notes” por porta (ex.: exposição típica, recomendações defensivas)
-* [ ] Cache de resolução DNS (reduz tempo)
-* [ ] Templates HTML alternativos (dark/light + print-friendly)
-* [ ] “Diff mode” (comparar scans e mostrar mudanças)
+* Prefira targets **do seu lab** (VMs, DNS interno, ambientes autorizados).
+* Comece com `Top N ports = 100` para um resultado rápido.
+* Aumente para `300` ou `1000` quando quiser mais cobertura.
+* Evite valores muito altos se sua máquina/ambiente for pequeno.
 
 ---
 
-## 👤 Credits
+## Segurança / Legal
 
-**Autor:** Cout
-
-* LinkedIn: [https://www.linkedin.com/in/SEU_LINKEDIN](https://www.linkedin.com/in/SEU_LINKEDIN)
-* GitHub: [https://github.com/taissocout/zonestrike](https://github.com/taissocout/zonestrike)
+* Use **somente** com autorização explícita e por escrito (quando aplicável).
+* Você é responsável pelo uso e impactos no ambiente.
+* Em caso de dúvida, valide o escopo e limites do teste antes de executar.
 
 ---
 
-## 📄 License
+## Créditos
 
-Escolha uma licença para o projeto (ex.: MIT).
-Se quiser, eu já te mando o `LICENSE` pronto e adiciono badge no README.
+* **Autor:** Cout
+* **LinkedIn:** [https://www.linkedin.com/in/SEU_LINKEDIN](https://www.linkedin.com/in/SEU_LINKEDIN)
+* **GitHub:** [https://github.com/taissocout/zonestrike](https://github.com/taissocout/zonestrike)
 
-```
-::contentReference[oaicite:0]{index=0}
-```
 
