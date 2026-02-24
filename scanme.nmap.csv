@@ -1,0 +1,5 @@
+name,ip,port,proto,state,service,product,version,confidence,evidence,banner,http_status,http_server,http_title
+scanme.nmap.org,2600:3c01::f03c:91ff:fe18:bb2f,22,tcp,open,ssh,OpenSSH,6.6.1p1,high,banner,SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13\r\n,,,
+scanme.nmap.org,2600:3c01::f03c:91ff:fe18:bb2f,80,tcp,open,http,Apache/2.4.7 (Ubuntu),,medium,http,,400,Apache/2.4.7 (Ubuntu),400 Bad Request
+scanme.nmap.org,45.33.32.156,22,tcp,open,ssh,OpenSSH,6.6.1p1,high,banner,SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.13\r\n,,,
+scanme.nmap.org,45.33.32.156,80,tcp,open,http,Apache/2.4.7 (Ubuntu),,medium,http,,200,Apache/2.4.7 (Ubuntu),Go ahead and ScanMe!

@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ZoneStrike — Report Index — scanme.nmap.org</title>
+<style>
+:root{--bg:#0b0f17;--card:#111827;--muted:#9CA3AF;--text:#E5E7EB;--line:rgba(255,255,255,.08);--a:#60A5FA}
+body{background:var(--bg);color:var(--text);font-family:system-ui,Arial;margin:24px}
+a{color:var(--a)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.k{color:var(--muted);font-size:12px} .v{font-size:22px;font-weight:700;margin-top:6px}
+table{width:100%;border-collapse:collapse;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th,td{border-bottom:1px solid var(--line);text-align:left;padding:10px;vertical-align:top}
+th{background:rgba(255,255,255,.03);color:var(--muted);font-size:12px}
+</style></head><body>
+<h1>ZoneStrike — Report Index</h1>
+<div style="color:var(--muted);font-size:12px">
+Target: <span class="mono">scanme.nmap.org</span> | Version: <span class="mono">1.7.2</span>
+</div>
+
+<div class="grid">
+  <div class="card"><div class="k">Top ports</div><div class="v">100</div></div>
+  <div class="card"><div class="k">Discovery (FQDNs)</div><div class="v">1</div></div>
+  <div class="card"><div class="k">Unique IPs</div><div class="v">2</div></div>
+  <div class="card"><div class="k">Hosts scanned</div><div class="v">2</div></div>
+</div>
+
+<div class="card">
+  <h2>Discovery Sources (resolved)</h2>
+  <table>
+    <thead><tr><th>FQDN</th><th>IPs</th><th>Evidence</th></tr></thead>
+    <tbody><tr><td class='mono'>scanme.nmap.org</td><td class='mono'>45.33.32.156, 2600:3c01::f03c:91ff:fe18:bb2f</td><td class='mono'>passive:apex</td></tr></tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Hosts</h2>
+  <table>
+    <thead><tr><th>Host</th><th>IP</th><th>Ports (port/service)</th><th>Count</th></tr></thead>
+    <tbody><tr><td><a href='scanme.nmap_scanme.nmap.org_2600_3c01_f03c_91ff_fe18_bb2f.html'>scanme.nmap.org</a></td><td class='mono'>2600:3c01::f03c:91ff:fe18:bb2f</td><td class='mono'>22/ssh, 80/http</td><td class='mono'>2</td></tr><tr><td><a href='scanme.nmap_scanme.nmap.org_45.33.32.156.html'>scanme.nmap.org</a></td><td class='mono'>45.33.32.156</td><td class='mono'>22/ssh, 80/http</td><td class='mono'>2</td></tr></tbody>
+  </table>
+</div>
+
+<div class="card" style="color:var(--muted);font-size:12px">
+  Started: <span class="mono">2026-02-24T13:47:14.984235+00:00</span> |
+  Finished: <span class="mono">2026-02-24T13:49:27.179114+00:00</span><br/>
+  Credits: Cout — <a href="https://www.linkedin.com/in/taissocout_cybersecurity">LinkedIn</a> • <a href="https://github.com/taissocout/zonestrike">GitHub</a>
+</div>
+</body></html>
