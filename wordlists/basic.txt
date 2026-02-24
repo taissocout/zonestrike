@@ -1,5 +1,0 @@
-www
-dev
-api
-mail
-intranet
