@@ -1,0 +1,14 @@
+{
+  "target_domain": "scanme.nmap.org",
+  "nameservers_used": [],
+  "nameserver_success": null,
+  "axfr_success": false,
+  "discovered_names": [],
+  "discovered_ips": [],
+  "ports_profile": "top500",
+  "ports_count": 500,
+  "hosts": [],
+  "started_at": "2026-02-23T23:26:55.252787+00:00",
+  "finished_at": "2026-02-23T23:26:57.139066+00:00",
+  "version": "1.5.3"
+}
