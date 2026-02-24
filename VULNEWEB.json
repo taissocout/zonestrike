@@ -1,0 +1,43 @@
+{
+  "target": "testphp.vulnweb.com",
+  "top_n_ports": 100,
+  "ports_count": 100,
+  "discovered_fqdns": 1,
+  "discovered_ips": 1,
+  "discovery": [
+    {
+      "fqdn": "testphp.vulnweb.com",
+      "source": "multi",
+      "evidence": "passive:apex",
+      "ips": [
+        "44.228.249.3"
+      ]
+    }
+  ],
+  "hosts": [
+    {
+      "ip": "44.228.249.3",
+      "name": "testphp.vulnweb.com",
+      "open_ports": [
+        {
+          "port": 80,
+          "proto": "tcp",
+          "state": "open",
+          "service": "http",
+          "product": null,
+          "version": null,
+          "confidence": "low",
+          "evidence": "nmap-services",
+          "banner": null,
+          "http_status": null,
+          "http_server": null,
+          "http_title": null
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "started_at": "2026-02-24T13:18:49.595835+00:00",
+  "finished_at": "2026-02-24T13:19:23.945088+00:00",
+  "version": "1.7.2"
+}

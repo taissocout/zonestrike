@@ -29,7 +29,7 @@ import dns.resolver
 VERSION = "1.7.2"
 
 CREDITS_NAME = "Cout"
-CREDITS_LINKEDIN = "https://www.linkedin.com/in/SEU_LINKEDIN"
+CREDITS_LINKEDIN = "https://www.linkedin.com/in/taissocout_cybersecurity"
 CREDITS_GITHUB = "https://github.com/taissocout/zonestrike"
 
 BANNER = rf"""
